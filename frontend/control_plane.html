@@ -850,37 +850,41 @@ function getProviderFromToken() {
 }
 
 function renderConnectionStatuses() {
-    const provider = getProviderFromToken();
-    const msBadges = ['outlook-badge', 'calendar-badge', 'todo-badge', 'onedrive-badge'];
-    
-    if (provider === 'microsoft') {
-        msBadges.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.className = 'badge-connected';
-                el.style.cssText = 'font-size: 12px; font-weight: 600; color: #059669; letter-spacing: 0.05em;';
-                el.textContent = 'CONNECTED';
-            }
-        });
-        const googleEl = document.getElementById('google-status-container');
-        if (googleEl) {
-            googleEl.innerHTML = `<button onclick="if(window.showToast)window.showToast('Google Workspace connection flow launching…','info')" class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all">Connect</button>`;
+    const provider = localStorage.getItem('ws_provider') ||
+                     localStorage.getItem('worksphere_provider') || 'microsoft';
+
+    const msServices = ['outlook', 'calendar', 'todo', 'onedrive'];
+
+    msServices.forEach(id => {
+        const badge = document.getElementById(id + '-badge') ||
+                      document.getElementById('microsoft-' + id + '-status') ||
+                      document.querySelector('[data-service="microsoft-' + id + '"] .status-badge');
+        if (!badge) return;
+        if (provider === 'microsoft') {
+            badge.textContent = 'CONNECTED';
+            badge.className = 'badge-connected';
+            badge.style.color = '#059669';
+            badge.style.fontWeight = '600';
+            badge.style.cssText = 'font-size: 12px; font-weight: 600; color: #059669; letter-spacing: 0.05em;';
+        } else {
+            badge.textContent = 'AVAILABLE';
+            badge.className = 'badge-disconnected';
+            badge.style.color = '#9CA3AF';
+            badge.style.fontWeight = '500';
+            badge.style.cssText = 'font-size: 12px; font-weight: 500; color: #9CA3AF; letter-spacing: 0.05em;';
         }
-    } else if (provider === 'google') {
-        msBadges.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.className = '';
-                el.style.cssText = 'font-size: 12px; font-weight: 500; color: #9CA3AF; letter-spacing: 0.05em;';
-                el.textContent = 'Available';
-            }
-        });
-        const googleEl = document.getElementById('google-status-container');
-        if (googleEl) {
+    });
+
+    const googleEl = document.getElementById('google-status-container');
+    if (googleEl) {
+        if (provider === 'google') {
             googleEl.innerHTML = `<span class="badge-connected" style="font-size: 12px; font-weight: 600; color: #059669; letter-spacing: 0.05em;">CONNECTED</span>`;
+        } else {
+            googleEl.innerHTML = `<button onclick="if(window.showToast)window.showToast('Google Workspace connection flow launching…','info')" class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all">Connect</button>`;
         }
     }
 }
+const renderConnectionStatus = renderConnectionStatuses;
 
 // Load current settings
 async function loadSettings() {

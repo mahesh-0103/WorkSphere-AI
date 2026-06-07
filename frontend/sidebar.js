@@ -372,7 +372,7 @@
                 });
                 if (resp.ok) {
                     const data = await resp.json();
-                    const name = data.display_name || data.name || 'Executive';
+                    const name = data.display_name || data.displayName || data.name || 'Executive';
                     // Blocklist check
                     const blocklist = ['google user', 'google', 'microsoft user', 'worksphere user', 'active session', 'user', 'null', 'undefined', 'executive'];
                     const sanitized = blocklist.includes(name.toLowerCase().trim()) ? null : name;

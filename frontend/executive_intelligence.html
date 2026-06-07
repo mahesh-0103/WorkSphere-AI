@@ -31,7 +31,12 @@
             font-size: 15px; font-weight: 600; margin: 12px 0 6px; color: var(--color-text-primary);
         }
         .executive-summary-content p { margin: 0 0 10px; line-height: 1.6; color: var(--color-text-primary); }
-        .executive-summary-content ul, .executive-summary-content ol { margin: 0 0 10px; padding-left: 20px; }
+        .executive-summary-content ul { list-style-type: disc; margin: 0 0 10px; padding-left: 20px; }
+        .executive-summary-content ol { list-style-type: decimal; margin: 0 0 10px; padding-left: 20px; }
+        .executive-summary-content li { margin-bottom: 4px; }
+        .executive-summary-content strong { font-weight: 600; color: #000; }
+        .decision-text-cell p, .flex-1 p { margin: 0; display: inline; }
+        .decision-text-cell strong, .flex-1 strong { font-weight: 600; }
         /* Skeleton Shimmer Animations */
         :root {
             --color-surface-container: #eeeeee;
@@ -440,9 +445,7 @@
     // ===== Today's formatted date =====
     function todayLabel() {
         return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    }
-
-    // ===== P4: Decision Tracker =====
+    }    // ===== P4: Decision Tracker =====
     function populateDecisionTracker(payload) {
         const tbody = document.getElementById('decision-tracker-rows');
         if (!tbody) return;
@@ -469,11 +472,11 @@
                 text = String(decision);
             }
             
-            const safeDecision = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const safeCtx = safeDecision.substring(0, 60).replace(/"/g, '&quot;');
+            const parsedDecision = (typeof marked !== 'undefined') ? marked.parse(text || '') : (text || '');
+            const safeCtx = text.substring(0, 60).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             tr.innerHTML = `
                 <td class="p-3 font-mono text-secondary whitespace-nowrap">${date}</td>
-                <td class="p-3 font-medium text-primary decision-text-cell">${safeDecision}</td>
+                <td class="p-3 font-medium text-primary decision-text-cell">${parsedDecision}</td>
                 <td class="p-3 text-secondary">${source}</td>
                 <td class="p-3 text-right">
                     <button onclick="createActionItem('${safeCtx}', this)" class="px-3 py-1 bg-surface-container hover:bg-surface-container-highest rounded border border-outline-variant text-[10px] font-bold text-primary transition-all">CREATE ACTION</button>
@@ -523,10 +526,11 @@
                 textClass = "text-orange-900";
             }
             
+            const parsedRisk = (typeof marked !== 'undefined') ? marked.parse(text || '') : (text || '');
             const badge = `<span class="px-2 py-0.5 ${badgeClass} text-[9px] font-bold rounded uppercase">${level}</span>`;
             const card = document.createElement('div');
             card.className = `p-3 rounded-lg ${bgClass} border flex items-start gap-3`;
-            card.innerHTML = `${badge}<p class="text-xs ${textClass} flex-1">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
+            card.innerHTML = `${badge}<div class="text-xs ${textClass} flex-1">${parsedRisk}</div>`;
             container.appendChild(card);
         });
     }
@@ -570,6 +574,7 @@
                 badgeStyle = "background-color: #dcfce7; color: #166534;";
             }
             
+            const parsedSignal = (typeof marked !== 'undefined') ? marked.parse(signalText || '') : (signalText || '');
             const row = document.createElement('div');
             row.className = 'p-3 bg-surface-container-low rounded-lg border border-outline-variant/40 space-y-1';
             row.innerHTML = `
@@ -577,7 +582,7 @@
                     <span class="text-primary font-semibold truncate pr-2">${name.replace(/</g,'&lt;')}</span>
                     <span class="px-2 py-0.5 rounded-full font-bold text-[9px] whitespace-nowrap" style="${badgeStyle}">${sentiment}</span>
                 </div>
-                <p class="text-[11px] text-secondary/80 leading-normal">${signalText.replace(/</g,'&lt;')}</p>`;
+                <div class="text-[11px] text-secondary/80 leading-normal">${parsedSignal}</div>`;
             container.appendChild(row);
         });
     }
@@ -613,12 +618,13 @@
             if (idle_hours > 0) {
                 displayDetails += ` - Idle: ${idle_hours}h`;
             }
-
+ 
+            const parsedDetails = (typeof marked !== 'undefined') ? marked.parse(displayDetails || '') : (displayDetails || '');
             const card = document.createElement('div');
             card.className = 'p-3 bg-surface-container-low rounded-lg border border-outline-variant/40 flex justify-between items-center';
             card.innerHTML = `
                 <div class="text-xs flex-1 pr-2">
-                    <p class="font-medium text-primary">${displayDetails}</p>
+                    <div class="font-medium text-primary">${parsedDetails}</div>
                 </div>
                 <div class="flex gap-1 shrink-0">
                     <button onclick="approveItem('${safeName}', this)" class="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
@@ -653,21 +659,22 @@
             let dateFormatted = "TODAY";
             if (timeStr) {
                 try {
-                    const parsedDate = new Date(timeStr);
-                    if (!isNaN(parsedDate)) {
-                        dateFormatted = parsedDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-                    } else {
-                        dateFormatted = timeStr;
-                    }
+                     const parsedDate = new Date(timeStr);
+                     if (!isNaN(parsedDate)) {
+                         dateFormatted = parsedDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                     } else {
+                         dateFormatted = timeStr;
+                     }
                 } catch(e) {
-                    dateFormatted = timeStr;
+                     dateFormatted = timeStr;
                 }
             }
             
+            const parsedTitle = (typeof marked !== 'undefined') ? marked.parse(title || '') : (title || '');
             const row = document.createElement('div');
             row.className = `flex justify-between items-center text-xs gap-3 ${isLast ? '' : 'border-b border-outline-variant/10 pb-1.5'}`;
             row.innerHTML = `
-                <h4 class="font-medium text-primary flex-1 truncate" title="${title.replace(/"/g,'&quot;')}">${title.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</h4>
+                <div class="font-medium text-primary flex-1 truncate" title="${title.replace(/"/g,'&quot;')}">${parsedTitle}</div>
                 <span class="text-secondary font-bold font-mono text-[9px] uppercase shrink-0">${dateFormatted}</span>
             `;
             container.appendChild(row);
