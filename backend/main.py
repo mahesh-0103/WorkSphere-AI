@@ -70,5 +70,6 @@ async def global_exception_handler(request, exc):
 app.include_router(api_router)
 
 @app.get("/health")
+@app.head("/health")
 def health_check():
     return {"status": "ok"}

@@ -795,6 +795,7 @@ async def get_intelligence_structured(token: str = Query(None), provider: str = 
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/")
+@router.head("/")
 def get_landing(response: Response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
