@@ -129,6 +129,63 @@ async def api_query(request: QueryRequest, req: Request):
                         yield f"data: {val}\n\n"
                         try:
                             parsed = json.loads(val)
+                            if parsed.get("event") == "agent_results":
+                                # Extract and save items to indexed_sources
+                                user_email = "session@worksphere.com"
+                                if request.provider == "microsoft":
+                                    try:
+                                        from graph.client import GraphClient
+                                        client = GraphClient(request.access_token)
+                                        profile = await client.get_profile()
+                                        user_email = profile.get("mail") or profile.get("userPrincipalName") or user_email
+                                    except Exception:
+                                        pass
+                                elif request.provider == "google":
+                                    user_email = "google-session@worksphere.com"
+                                    if request.access_token:
+                                        try:
+                                            import httpx
+                                            async with httpx.AsyncClient() as client:
+                                                resp = await client.get(
+                                                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                                                    headers={"Authorization": f"Bearer {request.access_token}"}
+                                                )
+                                                if resp.status_code == 200:
+                                                    user_data = resp.json()
+                                                    email = user_data.get("email")
+                                                    if email:
+                                                        user_email = email
+                                        except Exception:
+                                            pass
+
+                                # Process and save email items
+                                email_results = parsed.get("email_results") or {}
+                                for item in email_results.get("urgent_items", []):
+                                    name = item.get("subject") if isinstance(item, dict) else str(item)
+                                    summary = item.get("summary") if isinstance(item, dict) else f"Urgent email: {name}"
+                                    await save_indexed_source(user_email, name, "email", summary, ["email", "urgent", "briefing"])
+
+                                # Process and save meeting items
+                                meeting_results = parsed.get("meeting_results") or {}
+                                for item in meeting_results.get("key_decisions", []):
+                                    name = item.get("decision") if isinstance(item, dict) else str(item)
+                                    summary = item.get("context") if isinstance(item, dict) else f"Key Decision: {name}"
+                                    await save_indexed_source(user_email, name, "meeting", summary, ["meeting", "decision", "briefing"])
+
+                                # Process and save task items
+                                task_results = parsed.get("task_results") or {}
+                                for item in task_results.get("high_risk_tasks", []):
+                                    name = item.get("title") if isinstance(item, dict) else str(item)
+                                    summary = item.get("description") if isinstance(item, dict) else f"High risk task: {name}"
+                                    await save_indexed_source(user_email, name, "task", summary, ["task", "overdue", "briefing"])
+
+                                # Process and save document items
+                                research_results = parsed.get("research_results") or {}
+                                for item in research_results.get("relevant_documents", []):
+                                    name = item.get("name") if isinstance(item, dict) else str(item)
+                                    summary = item.get("summary") if isinstance(item, dict) else f"Indexed document: {name}"
+                                    await save_indexed_source(user_email, name, "document", summary, ["document", "knowledge", "briefing"])
+
                             if parsed.get("event") == "final_briefing":
                                 user_query = request.message
                                 briefing_text = parsed.get("data", "")
@@ -391,50 +448,7 @@ async def post_memory_search(request: SearchMemoryRequest, token: str = Query(No
     return real_results + formatted_data + pool_results
 
 # Global memory pool for simulated results (fix 17)
-MEMORY_POOL = [
-    {
-        "name": "Q4 Strategic Roadmap & Timeline.pdf",
-        "type": "document",
-        "lastModified": "2026-06-04T10:14:00Z",
-        "summary": "Full roadmap of deliverables, agent dependencies, and timeline milestones for next quarter's integration.",
-        "keywords": ["roadmap", "strategic", "timeline", "q4", "milestones"]
-    },
-    {
-        "name": "RE: Phoenix integration blocker details",
-        "type": "email",
-        "lastModified": "2026-06-05T08:22:00Z",
-        "summary": "Thread between Marcus and Dev lead regarding client secret configuration and Planner permission settings.",
-        "keywords": ["phoenix", "blocker", "integration", "permissions", "planner", "secret"]
-    },
-    {
-        "name": "Project Phoenix Scope Alignment meeting",
-        "type": "meeting",
-        "lastModified": "2026-06-05T09:00:00Z",
-        "summary": "Calendar event summary. Action item: Marcus to verify tenant ID permissions for Planner APIs.",
-        "keywords": ["phoenix", "meeting", "scope", "alignment", "action items"]
-    },
-    {
-        "name": "Fix Planner sync credentials",
-        "type": "task",
-        "lastModified": "2026-06-05T07:44:00Z",
-        "summary": "Assigned task in Outlook/Planner. Action item: Update app registrations in Azure portal.",
-        "keywords": ["planner", "sync", "credentials", "app registration", "task"]
-    },
-    {
-        "name": "Budget Projections Q3_Final.xlsx",
-        "type": "document",
-        "lastModified": "2026-06-03T16:50:00Z",
-        "summary": "Excel workbook tracking cost metrics, Groq model token utilization spends, and operational yields.",
-        "keywords": ["budget", "projections", "q3", "costs", "xlsx"]
-    },
-    {
-        "name": "RE: Design System Assets Uploaded",
-        "type": "email",
-        "lastModified": "2026-06-04T15:30:00Z",
-        "summary": "Stitch CSS styling asset URLs and design links shared with developers. Aesthetic design details verified.",
-        "keywords": ["design", "system", "assets", "stitch", "css", "styling"]
-    }
-]
+MEMORY_POOL = []
 
 class AddMemoryRequest(BaseModel):
     name: str

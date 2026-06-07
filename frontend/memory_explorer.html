@@ -480,6 +480,15 @@ function drawGraph() {
     // Clear nodes
     canvas.querySelectorAll('.kg-node').forEach(n => n.remove());
 
+    // Calculate counts for each type from SAMPLE_DATA
+    const counts = {
+        all: SAMPLE_DATA.length,
+        email: SAMPLE_DATA.filter(d => d.type === 'email').length,
+        meeting: SAMPLE_DATA.filter(d => d.type === 'meeting').length,
+        task: SAMPLE_DATA.filter(d => d.type === 'task').length,
+        document: SAMPLE_DATA.filter(d => d.type === 'document').length
+    };
+
     // Draw nodes
     GRAPH_NODES.forEach(node => {
         const el = document.createElement('div');
@@ -490,11 +499,14 @@ function drawGraph() {
         el.id = `node-${node.id === 'email' ? 'emails' : node.id === 'meeting' ? 'meetings' : node.id === 'task' ? 'tasks' : node.id === 'document' ? 'documents' : node.id}`;
 
         const size = node.id === 'client' ? 64 : 52;
+        const count = counts[node.type] || 0;
+        const labelText = node.id === 'client' ? `Client (${counts.all})` : `${node.label} (${count})`;
+
         el.innerHTML = `
             <div class="node-circle" style="width:${size}px;height:${size}px;background:${node.color};border:2px solid ${node.border};font-size:${size===64?26:20}px">
                 ${node.icon}
             </div>
-            <span class="node-label">${node.label}</span>
+            <span class="node-label">${labelText}</span>
         `;
         el.addEventListener('click', () => {
             const label = node.label.toLowerCase();
@@ -548,17 +560,7 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
     });
 });
 
-// ===== SEARCH & RESULTS =====
-const SAMPLE_DATA = [
-    { name:"Q4 Strategic Roadmap.pdf",                 type:"document", lastModified:"2026-06-04T10:14:00Z", summary:"Full roadmap of deliverables and milestones for next quarter.", confidence:0.97 },
-    { name:"RE: Phoenix integration blocker",          type:"email",    lastModified:"2026-06-05T08:22:00Z", summary:"Thread regarding client secret configuration and permissions.", confidence:0.95 },
-    { name:"Project Phoenix Scope Alignment",          type:"meeting",  lastModified:"2026-06-05T09:00:00Z", summary:"Meeting: action items and decisions from scope alignment session.", confidence:0.93 },
-    { name:"Fix Planner sync credentials",             type:"task",     lastModified:"2026-06-05T07:44:00Z", summary:"Update app registrations in Azure portal — assigned to Marcus.", confidence:0.90 },
-    { name:"Budget Projections Q3 Final.xlsx",         type:"document", lastModified:"2026-06-03T16:50:00Z", summary:"Cost metrics and operational yield workbook for Q3.", confidence:0.88 },
-    { name:"RE: Design System Assets Uploaded",        type:"email",    lastModified:"2026-06-04T15:30:00Z", summary:"Design asset URLs and styling links shared with the team.", confidence:0.85 },
-    { name:"Client Onboarding Review Call",            type:"meeting",  lastModified:"2026-06-03T14:00:00Z", summary:"Review of onboarding milestones with Sarah Jenkins.", confidence:0.82 },
-    { name:"Deliver Q4 Roadmap Specifications",        type:"task",     lastModified:"2026-06-02T12:00:00Z", summary:"Due June 8 — prepare specifications document for board review.", confidence:0.80 },
-];
+const SAMPLE_DATA = [];
 
 const resultsBody  = document.getElementById('memory-results-table-body');
 const countLabel   = document.getElementById('results-count-label');
@@ -713,8 +715,8 @@ form.addEventListener('submit', async e => {
 
 // Initial load
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('query-input').value = 'Phoenix';
-    doSearch('Phoenix');
+    document.getElementById('query-input').value = '';
+    doSearch('');
 });
 </script>
 </body>
