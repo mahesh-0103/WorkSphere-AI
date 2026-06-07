@@ -353,6 +353,11 @@ During remote staging builds, we resolved several critical dependency and platfo
 *   **Cause**: The inherited workflow file contained Node/NPM build instructions from a React template.
 *   **Resolution**: We updated [.github/workflows/ci.yml](file:///C:/Users/Kira/Documents/Projects/Worksphere/.github/workflows/ci.yml) to remove the Node/NPM build steps and replace them with a Python code syntax check: `python -m compileall backend`.
 
+### E. Hardcoded Redirect Host Conflicts (Localhost Mismatch)
+*   **Error**: Users accessing the deployed Render backend encounter `Error 400: redirect_uri_mismatch` on Google/Microsoft Sign-In, or their browser attempts to redirect to `localhost:8000/dashboard` which fails.
+*   **Cause**: Redirection targets and OAuth callback redirect URIs were hardcoded to `http://localhost:8000`.
+*   **Resolution**: Replaced the hardcoded targets in `google_auth.py`, `microsoft_auth.py`, and `routes.py` with dynamic base URL resolution utilizing FastAPI's `request.base_url` for in-route redirects, and environment variables (`RENDER_EXTERNAL_URL` / `BASE_URL`) for client-side OAuth configurations.
+
 ---
 
 ## 9. Future Development Roadmap
