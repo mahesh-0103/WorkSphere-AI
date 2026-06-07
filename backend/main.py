@@ -11,7 +11,7 @@ load_dotenv()
 # Import the router from api/routes.py
 from api.routes import router as api_router
 
-app = FastAPI(title="Worksphere Backend")
+app = FastAPI(title="WorkSphere AI Backend")
 
 # Enable session middleware
 app.add_middleware(
