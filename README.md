@@ -1,79 +1,84 @@
-# WorkSphere AI
+# 🚀 WorkSphere AI
 
-A multi-agent AI workplace assistant that connects to Microsoft 365 and Google Workspace to answer questions about your emails, meetings, tasks, and documents.
+**The High-Performance Sovereign Executive Layer for Autonomous Workplace Analysis.**
 
----
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![HTML/JS Version](https://img.shields.io/badge/frontend-Vanilla%20HTML%20%2F%20JS-61DAFB.svg)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![License](https://img.shields.io/badge/license-Apache%202.0-orange.svg)](LICENSE.txt)
+[![Performance](https://img.shields.io/badge/latency-sub--second-green.svg)](#performance-engine)
 
-## 1. System Overview
-*   **Orchestrated Agent Fleet**: Runs parallel Communications, Meeting, Workload, and Knowledge Analysts using `asyncio.gather`.
-*   **Two-Call Synthesis Pipeline**: Computes a streaming markdown Chief of Staff briefing, followed by a non-streaming structured JSON data extraction.
-*   **Token Caching & SSE**: Caches structured payload data and streams it down in real-time as a terminal Server-Sent Event (SSE).
-*   **Persistent Control Plane**: Toggles, sliders, and dropdown selections are persisted on settings update and re-loaded dynamically.
+WorkSphere AI is a premium, multi-agent command center that compiles unstructured enterprise communications into a structured, dependency-aware workplace intelligence suite. It functions as a digital **Chief of Staff**, orchestrating a fleet of specialized analytical agents (Email, Meeting, Task, and Research Analysts) in parallel to compile streaming briefings, track decisions, monitor stakeholder sentiment, and suggest instant quick actions with sub-second latency.
 
----
-
-## 2. Directory Structure
-
-```
-worksphere-ai/
-├── frontend/                ← Renamed from stitch_assets/
-│   ├── landing_page.html
-│   ├── command_center.html
-│   ├── executive_intelligence.html
-│   ├── agent_operations.html
-│   ├── memory_explorer.html
-│   └── sidebar.js
-├── backend/
-│   ├── main.py
-│   ├── settings.json
-│   ├── api/routes.py
-│   ├── supervisor/supervisor.py
-│   ├── agents/
-│   ├── ai/
-│   ├── auth/
-│   ├── graph/
-│   └── memory/
-├── requirements.txt
-├── .gitignore
-└── README.md
-```
+> [!IMPORTANT]
+> **Performance Optimized**: This version of WorkSphere AI has been hardened with parallel `asyncio` execution, real-time Server-Sent Events (SSE), cached structured JSON payloads, and dynamic LLM fallback routers for a fluid, lag-free executive experience.
 
 ---
 
-## 3. Environment Variables (.env)
+### 🏛️ Main Features
 
-Configure these in `backend/.env` (reference `backend/.env.example`):
-*   `MICROSOFT_CLIENT_ID`: Azure Client Application ID.
-*   `MICROSOFT_CLIENT_SECRET`: Azure Application Secret Value.
-*   `MICROSOFT_TENANT_ID`: Set to `common` for multi-tenant and personal logins.
-*   `GROQ_API_KEY`: Groq API Console key.
-*   `GEMINI_API_KEY`: Google Gemini Developer key (fallback model router).
-*   `SUPABASE_URL`: Supabase backend endpoint URL (optional, defaults to mock if unconfigured).
-*   `SUPABASE_KEY`: Supabase service role key (optional).
+- **Parallel Analyst Fleet**: Deploys specialized sub-agents concurrently (Communications, Meeting, Workload, and Knowledge Analysts) using `asyncio.gather` to minimize latency.
+- **Two-Call Synthesis Pipeline**: Computes a streaming markdown Chief of Staff briefing, followed by a non-streaming structured JSON data extraction.
+- **Executive Intelligence Center**: Renders decision tracking, approval queues, risk radars, stakeholder sentiment tables, and upcoming deadlines dynamically.
+- **Token Caching & SSE**: Caches structured JSON payloads immediately and streams them down in real-time as a terminal Server-Sent Event (SSE).
+- **Interactive Memory Explorer**: An interactive SVG Knowledge Graph representing connected organizations, documents, tasks, and meetings with visual linkage filters.
+- **Persistent Control Plane**: System settings, model selections, and analyst fleet toggles are saved and persisted dynamically.
 
 ---
 
-## 4. Setup & Running Instructions
+### ⚡ Performance Engine
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
+WorkSphere AI is built for speed and reliability. Recent architectural optimizations include:
+
+- **Parallel Supervisor Pipeline**: Concurrently executes all agents using Python asynchronous I/O, yielding consolidated analysis in sub-second times.
+- **Structured Payload Caching**: Stores parsed agent JSON results directly in local/Redis caches, allowing the dashboard UI to render instantly on page load.
+- **SSE Stream Multiplexing**: Delivers both real-time text briefing chunks and structured JSON states in a single network stream, removing the need for secondary fetch requests.
+- **Resilient Model Fallbacks**: Instantly routes requests through fallback LLMs (Groq primary, Gemini models fallback) if API rate limits or service outages occur.
+
+---
+
+### 📦 Installation & Setup
+
+1. **Backend Environment & Server**:
+   ```bash
+   $ cd backend
+   $ pip install -r requirements.txt
+   $ python -m uvicorn main:app --host 127.0.0.1 --port 8000
+   ```
+   *Required `.env` keys*: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID`, `GROQ_API_KEY`, `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`.
+
+2. **Frontend Layer**:
+   The frontend is built using Vanilla HTML/JS with glassmorphism CSS, and is served directly by the FastAPI backend. Access the pages after startup at:
+   *   `/` — Landing page with Microsoft/Google OAuth integrations.
+   *   `/dashboard` — Command Center with live Briefing streaming.
+   *   `/executive_intelligence` — Chief of Staff Decision and Risk Radar dashboard.
+   *   `/agent_operations` — Operations monitoring and live SSE terminal activity feeds.
+   *   `/memory_explorer` — Interactive SVG Knowledge Graph browser.
+   *   `/control_plane` — Settings configurations.
+
+---
+
+### 🔄 System Workflow
+
+```mermaid
+graph TD
+    A[M365 / Google Workspace Data] -->|Parallel Agents| B[Supervisor Coordination]
+    B -->|Streaming SSE Chunks| C[Command Center Dashboard]
+    B -->|Cached JSON Payload| D[Executive Intelligence Center]
+    D -->|Quick Actions connector| E[Microsoft To Do / Outlook Sync]
+    C -->|Search Filter| F[Interactive Memory Explorer]
+    D -->|Real-time Toggles| G[Persistent Control Plane]
 ```
 
-### 2. Configure Environment
-Copy `backend/.env.example` to `backend/.env` and supply all active secrets.
+---
 
-### 3. Run the Backend Server
-```bash
-cd backend
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-```
+### 🔐 Licensing
 
-### 4. Access the Application
-Open [http://localhost:8000](http://localhost:8000) in your web browser.
-*   `/` — Landing page with Microsoft and Google login triggers.
-*   `/dashboard` — Command Center with live Briefing streaming and dynamic Quick Actions.
-*   `/executive_intelligence` — Chief of Staff Decision Tracker, Approval Queue, Risk Radar, and Deadlines.
-*   `/agent_operations` — Agent fleet workloads, execution metrics, and streaming Activity Feed.
-*   `/memory_explorer` — SVG Knowledge Graph explorer with interactive filters and search query inputs.
-*   `/control_plane` — Settings configuration and persistent analyst toggles.
+WorkSphere AI is distributed under the Apache Software License. See the [LICENSE.txt](./LICENSE.txt) file in the release for details.
+
+### 👋 Feedback
+
+Please drop [Maheswaran](https://github.com/mahesh-0103) a note with any feedback. Your input drives the evolution of our sovereign intelligence.
+
+---
+
+*WorkSphere AI • Your Strategic Executive Layer • v1.3.0 (Perf-Boost) • 2026*
