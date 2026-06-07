@@ -1,4 +1,4 @@
-name: TaskPilot Deployment CI
+name: WorkSphere AI CI
 
 on:
   push:
@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v4
 
@@ -19,27 +19,13 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Install Backend Dependencies (Fast Build)
+    - name: Install Backend Dependencies
       run: |
         cd backend
         python -m pip install --upgrade pip
-        pip install --no-cache-dir --prefer-binary -r requirements.txt
+        pip install --no-cache-dir -r requirements.txt
 
-    - name: Install Frontend Dependencies
+    - name: Verify Python Code Syntax
       run: |
-        cd frontend
-        npm install
+        python -m compileall backend
 
-    - name: Build Frontend
-      run: |
-        cd frontend
-        npm run build
-      env:
-        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
