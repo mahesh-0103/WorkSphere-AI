@@ -1,14 +1,14 @@
 # WorkSphere AI — Comprehensive System Architecture & Development Milestone Report
 
-WorkSphere AI is a state-of-the-art, multi-agent AI workplace assistant designed to serve as a sovereign executive layer. The platform consolidates organizational intelligence by securely connecting to collaboration suites (Microsoft 365 and Google Workspace), extracting knowledge from raw emails, meetings, tasks, and documents, and orchestrating specialized AI agents in parallel. 
+WorkSphere AI is a state-of-the-art, multi-agent AI workplace assistant designed to serve as a sovereign executive layer. The platform consolidates organizational intelligence by securely connecting to collaboration suites (Microsoft 365 and Google Workspace), extracting knowledge from raw emails, meetings, tasks, and documents, and orchestrating specialized AI agents in parallel.
 
-This document provides a highly detailed, component-by-component view of the entire WorkSphere AI platform—from its core architectural flow to the latest troubleshooting milestones and the future development roadmap.
+This document serves as the complete technical handbook, system architecture blueprint, and troubleshooting log for the WorkSphere AI codebase.
 
 ---
 
 ## 1. Executive Summary & Value Proposition
 
-In modern enterprise environments, executives and teams lose hours daily to context-switching between emails, calendar events, workloads, and file systems. WorkSphere AI reclaims this lost productivity by introducing an autonomous, multi-agent intelligence layer. 
+In modern enterprise environments, executives and teams lose hours daily to context-switching between emails, calendar events, workloads, and file systems. WorkSphere AI reclaims this lost productivity by introducing an autonomous, multi-agent intelligence layer.
 
 ### Core Objectives
 *   **Consolidated Executive Briefing**: Deploys an agent fleet to scan all data sources and synthesize a unified, streaming markdown briefing (the Chief of Staff report) ready before the workday begins.
@@ -16,55 +16,47 @@ In modern enterprise environments, executives and teams lose hours daily to cont
 *   **Bidirectional Integration**: Enables one-click quick actions that write back data (such as syncing tasks and approvals) directly to Microsoft To Do, Outlook, and Planner connectors.
 *   **Sovereign Data Privacy**: Designed to be hosted locally, within a Kubernetes container cluster, or in a single-tenant virtual private cloud (VPC), ensuring sensitive enterprise keys and data are never exposed.
 
+### Key Architectural Choices
+*   **FastAPI vs. Django/Flask**: Selected FastAPI for its native asynchronous capabilities, automatic OpenAPI generation, and speed. Async execution is vital because the supervisor gathers data from multiple external APIs concurrently.
+*   **Vanilla HTML/JS vs. React/Vite**: Choosing Vanilla JS eliminates build-step overhead, removes Webpack/Vite compilation latencies, and allows files to be served directly from the FastAPI static mount. This is highly suitable for sovereign deployment contexts.
+*   **Server-Sent Events (SSE) vs. Polling/WebSockets**: SSE was chosen over polling to provide a real-time, low-latency text stream from the AI agents without overloading the network. It was preferred over WebSockets because it is unidirectional, runs over standard HTTP, and naturally handles reconnects.
+
 ---
 
 ## 2. System Architecture & High-Level Design
 
 WorkSphere AI is structured as a decoupled, high-performance web application consisting of a FastAPI backend and a modern, glassmorphism-styled Vanilla HTML/CSS/JS frontend.
 
-### A. Data Ingress & Integration Layer
-The system integrates with enterprise directories using secure OAuth 2.0 authorization codes:
-*   **Microsoft Graph API Client**: Programmed inside `backend/graph/client.py`, retrieving calendar schedules, inbox messages, OneDrive document indexes, and Planner tasks.
-*   **Google Workspace Client**: Programmed inside `backend/graph/gmail_client.py` to support Google Calendar, Gmail, and Google Drive syncing.
-*   **Supabase Client**: Configured inside `backend/memory/supabase_client.py` as a database for storing persistent briefing history, user settings, and knowledge graph indexes.
+### A. Core Architecture Flow
+The following diagram illustrates the lifecycle of a user session, from OAuth authentication to parallel agent execution and SSE delivery:
 
-### B. The Parallel Agent Fleet
-When a user requests a briefing, the backend orchestrates a fleet of specialized sub-agents running concurrently via Python's `asyncio.gather` pipeline to minimize response latency:
-
-```
-                            [User Query Trigger]
-                                      │
-                                      ▼
-                           [Supervisor Coordinator]
-                                      │
-                 ┌────────────────────┼────────────────────┐
-                 ▼                    ▼                    ▼
-          [Email Analyst]     [Meeting Analyst]     [Task Analyst]
-                 │                    │                    │
-                 └────────────────────┼────────────────────┘
-                                      │
-                                      ▼
-                             [Research Analyst]
-                                      │
-                                      ▼
-                             [Reporting Agent]
-                                      │
-                 ┌────────────────────┴────────────────────┐
-                 ▼                                         ▼
-         [Briefing Stream]                        [Structured Payload]
-        (Streaming Markdown)                         (Cached JSON)
+```mermaid
+graph TD
+    User([User Session]) -->|OAuth2 Login| MS_Entra[Microsoft Entra ID]
+    User -->|Access Dashboard| UI[Frontend Dashboard]
+    UI -->|GET /api/intelligence/structured| API_Structured[Structured Data API]
+    UI -->|POST /api/query| API_Query[SSE Briefing Stream]
+    
+    API_Query -->|Orchestrates| Supervisor[Agent Supervisor]
+    Supervisor -->|Parallel Execution| Agents[Specialized Sub-Agents]
+    
+    subgraph specialized_agents [Specialized Analysts]
+        Agents --> Email[Communications Analyst]
+        Agents --> Meeting[Meeting Analyst]
+        Agents --> Task[Workload Analyst]
+        Agents --> Research[Knowledge Analyst]
+    end
+    
+    Email & Meeting & Task & Research -->|Raw Outputs| Synthesizer[Reporting Agent]
+    Synthesizer -->|Markdown Summary| UI
+    Synthesizer -->|Structured JSON Payload| Cache[(Redis / In-Memory Cache)]
+    Cache --> API_Structured
 ```
 
-1.  **Communications Analyst (`email_agent.py`)**: Filters urgent emails and flags stakeholder sentiments.
-2.  **Meeting Analyst (`meeting_agent.py`)**: Identifies meeting conflicts, decisions, and risks.
-3.  **Workload Analyst (`task_agent.py`)**: Flags overdue tasks, high-risk items, and computes time-saving statistics.
-4.  **Knowledge Analyst (`research_agent.py`)**: Queries OneDrive/Google Drive documents for query-matching facts.
-5.  **Reporting Agent (`reporting_agent.py`)**: Consolidates raw agent results, executing a streaming call for markdown synthesis and a secondary structured JSON extraction call.
-
-### C. Caching & Server-Sent Events (SSE)
-To provide a fluid, lag-free frontend experience:
-*   **Zero-Copy Cache Pipeline**: The Reporting Agent writes the structured JSON payload immediately to the cache.
-*   **SSE Stream Multiplexing**: The `/api/query` route streams markdown briefing chunks in real-time. Upon completion, it yields a terminal SSE event named `structured` containing the entire JSON payload, ensuring the frontend is fully populated without secondary fetches.
+### B. Detailed Data Ingress Flow
+1.  **Authentication**: The user logs in via Microsoft Entra ID or Google OAuth. The backend redirects the user to the auth provider, handles the callback, exchanges the code for an access token, and redirects the browser back to the frontend with the token.
+2.  **API Requests**: The frontend stores the token in `localStorage` and includes it in the `Authorization` header of all subsequent API requests.
+3.  **Graph Querying**: When the supervisor runs, it initiates parallel async requests to fetch data from Outlook, Calendars, To Do, OneDrive, or Gmail.
 
 ---
 
@@ -128,7 +120,6 @@ worksphere-ai/
 ├── LICENSE.txt              ← Software usage permissions license
 ├── render.yaml              ← Render cloud service deployment configuration
 ├── vercel.json              ← Vercel URL rewrite router configuration
-├── check_tasks.py           ← Supabase insertion test helper
 ├── clean_null_bytes.py      ← Byte cleaning utility
 ├── tempCodeRunnerFile.python← Temporary runner helper
 └── README.md                ← Project presentation layout
@@ -144,7 +135,9 @@ This file boots the application, configures the session middleware, setups the C
 ```python
 import os
 import sys
+
 # Add current directory to path to ensure local packages (api, ai, memory, etc.) are always importable
+# This is a critical requirement for Docker and Render environments
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI, Request
@@ -167,20 +160,60 @@ app.add_middleware(
     secret_key=os.getenv("SESSION_SECRET_KEY", "worksphere_default_secret_key_1234567890"),
     session_cookie="worksphere_session"
 )
+
+# CORS — restrict to known origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Wildcard or dynamically populated origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include the router
+app.include_router(api_router)
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
 ```
 
 ### B. REST & SSE Router (`backend/api/routes.py`)
-Serves as the main communication bridge. It houses standard endpoints for authentication redirects, profile retrievals, system status metrics, settings modifications, and frontend pages.
-*   `POST /api/query`: Connects a client to the SSE event stream, executing `run_supervisor` and yielding real-time briefing updates, logs, and the terminal `structured` JSON event.
-*   `GET /api/intelligence/structured`: Returns the structured cache object representing today's focus items (decisions, deadlines, sentiments).
-*   `POST /api/settings/update`: Save and write updated settings to `settings.json` locally.
-*   `POST /api/actions/approve-budget`: Mock connector executing Q3 finance budget sign-offs.
-*   `POST /api/actions/create-todo`: Syncs any extracted decision straight to Microsoft To Do.
-
-### C. Supervisor Coordinator (`backend/supervisor/supervisor.py`)
-Responsible for running the agent fleet concurrently and writing results to the cache.
+Serves as the main communication bridge. It houses endpoints for authentication redirects, profile retrievals, system status metrics, settings modifications, and frontend pages.
 
 ```python
+# Route to handle Microsoft login redirects
+@router.get("/auth/callback")
+def callback(request: Request, code: str = Query(None)):
+    if not code:
+        raise HTTPException(status_code=400, detail="Missing authorization code")
+    try:
+        access_token = get_token_from_code(code)
+        # Redirect user back to the frontend dashboard dynamically based on the request host
+        base_url = str(request.base_url).rstrip('/')
+        redirect_url = f"{base_url}/dashboard?token={access_token}"
+        return RedirectResponse(url=redirect_url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
+
+# Route to handle Google login redirects
+@router.get("/auth/google/callback")
+async def google_callback(code: str, request: Request):
+    token_data = await get_google_token(code)
+    access_token = token_data.get("access_token")
+    
+    # Redirect to frontend dashboard dynamically based on request host
+    base_url = str(request.base_url).rstrip('/')
+    return RedirectResponse(
+        f"{base_url}/dashboard?token={access_token}&provider=google"
+    )
+```
+
+### C. Supervisor Coordinator (`backend/supervisor/supervisor.py`)
+Coordinates parallel agent execution and handles cache storage.
+
+```python
+# Pipeline supervisor coordinates all analytical agents
 async def run_supervisor(user_query: str, access_token: str, provider: str = "microsoft", limited_scopes: bool = False):
     yield log_event("SYSTEM", "Initializing WorkSphere Intelligence Analysis...")
     
@@ -218,12 +251,12 @@ async def run_supervisor(user_query: str, access_token: str, provider: str = "mi
     await cache_client.set(cache_key_structured, reporting_result["structured"], ttl=settings.report_cache_ttl)
 ```
 
-### D. Specialized Sub-Agents (`backend/agents/`)
+### E. Specialized Sub-Agents (`backend/agents/`)
 We refactored each agent to return a strongly-typed Python dictionary rather than arbitrary plain-text:
 
 #### Email Agent (`email_agent.py`)
 Extracts communication priorities.
-*   **Returns**: 
+*   **Returns**:
     ```python
     {
         "urgent_emails": [{"subject": str, "sender": str, "reason": str}],
@@ -231,7 +264,7 @@ Extracts communication priorities.
         "stakeholder_sentiment": [{"name": str, "sentiment": str, "signal": str}]
     }
     ```
-*   **Urgency & Approval Matchers**: Implemented case-insensitive substring scans rather than exact word matchers. Trigger expressions include: `"please approve"`, `"awaiting sign-off"`, `"needs your review"`, and `"action required"`.
+*   **Urgency & Approval Matchers**: Implemented case-insensitive substring scans. Trigger expressions include: `"please approve"`, `"awaiting sign-off"`, `"needs your review"`, and `"action required"`.
 
 #### Meeting Agent (`meeting_agent.py`)
 Extracts schedule conflicts and critical decisions.
@@ -245,7 +278,7 @@ Extracts schedule conflicts and critical decisions.
     ```
 
 #### Task Agent (`task_agent.py`)
-Analyzes workload profiles and overdue timelines.
+Flags overdue tasks and calculates time saved.
 *   **Returns**:
     ```python
     {
@@ -256,7 +289,7 @@ Analyzes workload profiles and overdue timelines.
     ```
 
 #### Reporting Agent (`reporting_agent.py`)
-Responsible for consolidated reporting.
+Performs the final synthesis.
 *   **Two-Call Synthesis Pipeline**:
     *   **Call A**: Executes a streaming LLM request. Yields real-time markdown briefing chunks (e.g. Executive Briefing, Project Health, Strategic Recommendations).
     *   **Call B**: Executes a non-streaming LLM request. Extracts a structured JSON payload representing consolidated focus items.
@@ -272,44 +305,84 @@ Responsible for consolidated reporting.
 
 ## 5. Code Hardening & Logic Audits
 
-Throughout the development cycle, we performed strict logic audits to eliminate hardcoded data, resolve rendering bugs, and optimize UI performance:
-
 ### A. Static DOM Sanitization
 We audited [executive_intelligence.html](file:///C:/Users/Kira/Documents/Projects/Worksphere/frontend/executive_intelligence.html) and [command_center.html](file:///C:/Users/Kira/Documents/Projects/Worksphere/frontend/command_center.html), removing all mock rows and card placeholders from the static HTML.
-*   **Before**: Static rows displayed placeholder text like `"Approve marketing campaign by next Friday"` and `"Technical dependency on developer team"`.
-*   **After**: All panels initialize as blank. They populate dynamically using data-driven JavaScript loops only if a valid structured payload is retrieved from the cache. Added a global `data-source="structured"` attribute to all data-driven panels.
+
+*   **Before (Hardcoded Decision Rows)**:
+    ```html
+    <tr class="hover:bg-surface-variant/20 transition-colors duration-150">
+        <td class="px-md py-sm font-medium text-on-surface">Approve marketing campaign by next Friday</td>
+        <td class="px-md py-sm text-on-surface-variant font-mono">Email Connector</td>
+        <td class="px-md py-sm text-on-surface-variant">2026-06-08</td>
+    </tr>
+    ```
+*   **After (Dynamic Structured Binding)**:
+    ```javascript
+    function renderDecisions(decisions) {
+        const tableBody = document.getElementById("decisions-table-body");
+        tableBody.innerHTML = "";
+        if (!decisions || decisions.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-md text-on-surface-variant/60">No decisions detected today</td></tr>`;
+            return;
+        }
+        decisions.forEach(item => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td class="px-md py-sm font-medium text-on-surface">${item.decision}</td>
+                <td class="px-md py-sm text-on-surface-variant font-mono">${item.source}</td>
+                <td class="px-md py-sm text-on-surface-variant">${item.date || 'N/A'}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+    ```
 
 ### B. UI Rendering Bug Fixes
-*   **Telemetry Card Truncation**: STAT value spans on the dashboard were truncating mid-word (e.g., `"NOMIN..."`, `"4 Conne..."`) due to fixed width constraints. We removed `overflow: hidden` and `text-overflow: ellipsis`, allowed text wrapping, increased card heights, and set a scalable font size using `font-size: clamp(12px, 2vw, 18px)`.
+*   **Telemetry Card Truncation**: STAT value spans on the dashboard were truncating mid-word (e.g., `"NOMIN..."`, `"4 Conne..."`). We removed `overflow: hidden` and `text-overflow: ellipsis`, allowed text wrapping, increased card heights, and set a scalable font size using `font-size: clamp(12px, 2vw, 18px)`.
 *   **Upcoming Deadlines `[object Object]` bug**: The template interpolation was rendering deadline objects as strings. We resolved this by destructuring the properties (`.title`, `.due_date`, `.priority`) explicitly prior to injection.
 *   **Control Plane Toggle States**: Settings toggles were resetting to default states upon page refresh. We resolved this by adding a `GET /api/settings` query inside `control_plane.html` on `DOMContentLoaded` to fetch the cached parameters and apply checked properties to all checkboxes, select values, and sliders.
 
-### C. UX Polish Operations
-*   **Skeleton Loading States**: Created a pulsing shimmer animation:
+### C. UX Polish Operations (Skeleton Shimmer Implementation)
+To improve visual delivery, we implemented skeleton pulsing loaders on all async panels.
+*   **CSS Style Configuration**:
     ```css
     @keyframes shimmer {
         0% { background-position: -200% 0; }
         100% { background-position: 200% 0; }
     }
     .skeleton {
-        background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-variant) 50%, var(--color-surface) 75%);
+        background: linear-gradient(90deg, 
+            var(--color-surface) 25%, 
+            var(--color-surface-variant) 50%, 
+            var(--color-surface) 75%
+        );
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+        min-height: 20px;
     }
     ```
-    This class is applied to panels at fetch initiation and removed when the async request resolves.
-*   **Knowledge Graph Interactive Nodes**: Bound SVG graph nodes in `memory_explorer.html` to click events. Clicking a node highlights the element, filters the data table to display only related items, and updates the search box value.
-*   **Live SSE Activity Feed**: Integrated a collapsible logs terminal inside `agent_operations.html`. This listens to the `/api/query` SSE stream, formatting and writing logs (e.g. `[EmailAgent] Scanning inbox...`) to a code-styled console.
+*   **JavaScript Shimmer Injection Trigger**:
+    ```javascript
+    function togglePanelLoading(panelId, isLoading) {
+        const panel = document.getElementById(panelId);
+        if (isLoading) {
+            panel.classList.add("skeleton");
+            panel.querySelectorAll("*").forEach(child => child.style.visibility = "hidden");
+        } else {
+            panel.classList.remove("skeleton");
+            panel.querySelectorAll("*").forEach(child => child.style.visibility = "visible");
+        }
+    }
+    ```
 
 ---
 
 ## 6. Restructuring & Git Cleanup Milestones
 
-To bring the codebase to production standards, we restructured the files and initialized Git version tracking:
-
 1.  **Stitch Assets Renaming**: Renamed the root directory `stitch_assets/` to `frontend/`. Ran global replacements to update path declarations in Python files and static links in HTML documents.
 2.  **Ignored Cache Files**: Created [.gitignore](file:///C:/Users/Kira/Documents/Projects/Worksphere/.gitignore) to exclude system caches, environment files (`.env`), settings secrets (`settings.json`), logs, and Python virtual environments (`venv/`).
-3.  **Local Git Initialization**: Initialized a local repository in `C:\Users\Kira\Documents\Projects\Worksphere`, verified tracked states using `git status`, committed the clean codebase, and successfully pushed the code to the remote repository.
+3.  **Local Git Initialization**: Initialized a local repository in `C:\Users\Kira\Documents\Projects\Worksphere`, committed the clean codebase, and pushed the code to the remote repository.
 
 ---
 
@@ -317,21 +390,40 @@ To bring the codebase to production standards, we restructured the files and ini
 
 We imported essential deployment templates and test scripts from the `TaskPilot` folder to support automated builds:
 
-*   **Vercel Routing (`vercel.json`)**: Formulates path rewrites to serve our single-page HTML interfaces.
-*   **Render Environments (`render.yaml`)**: Outlines the build and start commands for hosting the FastAPI backend web service.
-*   **Supabase Verifier (`check_tasks.py`)**: Executes raw inserts into Supabase to verify that RLS (Row-Level Security) policies and table permissions are configured correctly.
-*   **Null Byte Cleaner (`clean_null_bytes.py`)**: Scans Python files to strip binary null bytes (`\x00`) that cause compiler syntax errors.
+### A. Vercel Routing Configuration (`vercel.json`)
+```json
+{
+  "github": {
+    "silent": true
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+### B. Render Web Service Deployment Configuration (`render.yaml`)
+```yaml
+services:
+  - type: web
+    name: autoexec-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.13
+```
 
 ---
 
 ## 8. Deployment Troubleshooting & Resolutions
 
-During remote staging builds, we resolved several critical dependency and platform runtime errors:
-
 ### A. Protobuf & gRPC Diamond Dependency Conflict
 *   **Error**: Render builds failed with `ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/`.
 *   **Cause**: `google-ai-generativelanguage==0.6.15` required `protobuf < 6.0.0dev`, but pinning `grpcio-status==1.81.0` required `protobuf >= 6.33.5` (a version conflict).
-*   **Resolution**: We updated the root [requirements.txt](file:///C:/Users/Kira/Documents/Projects/Worksphere/requirements.txt) to use relaxed version ranges (e.g. `grpcio>=1.60.0`, `grpcio-status>=1.60.0`, `protobuf>=4.25.0`), allowing pip's solver to automatically determine a compatible set of versions.
+*   **Resolution**: We updated the root [requirements.txt](file:///C:/Users/Kira/Documents/Projects/Worksphere/requirements.txt) to use relaxed version ranges (e.g. `grpcio>=1.60.0`, `grpcio-status>=1.60.0`, `protobuf>=4.25.0`), allowing pip's resolver to automatically determine a compatible set of versions.
 
 ### B. Supabase & HTTPX Version Conflict
 *   **Error**: Build execution failed with `Cannot install fastapi, groq, and supabase because of conflicting httpx requirements`.
@@ -358,6 +450,11 @@ During remote staging builds, we resolved several critical dependency and platfo
 *   **Cause**: Redirection targets and OAuth callback redirect URIs were hardcoded to `http://localhost:8000`.
 *   **Resolution**: Replaced the hardcoded targets in `google_auth.py`, `microsoft_auth.py`, and `routes.py` with dynamic base URL resolution utilizing FastAPI's `request.base_url` for in-route redirects, and environment variables (`RENDER_EXTERNAL_URL` / `BASE_URL`) for client-side OAuth configurations.
 
+### F. Render Google OAuth Redirect URI Mismatch Error
+*   **Error**: Attempting Google authentication displays a Google warning page: `Error 400: redirect_uri_mismatch`.
+*   **Cause**: The app's dynamic redirect URI resolved to `https://worksphere-ai-acz1.onrender.com/auth/google/callback`, which was not white-listed in the Google Cloud Console.
+*   **Resolution**: Logged into the Google Cloud Credentials Console, located the OAuth Client ID, and appended `https://worksphere-ai-acz1.onrender.com/auth/google/callback` to the list of **Authorized redirect URIs**.
+
 ---
 
 ## 9. Future Development Roadmap
@@ -366,9 +463,33 @@ During remote staging builds, we resolved several critical dependency and platfo
 *   Migrate the Google Workspace clients from mock status to active API endpoints.
 *   Setup Google OAuth consent configurations and enable retrieval of Gmail items, Google Calendar events, and Google Tasks.
 
+```python
+# Future google integration draft for calendar querying
+async def fetch_google_calendar_events(access_token: str):
+    async with httpx.AsyncClient() as client:
+        headers = {"Authorization": f"Bearer {access_token}"}
+        resp = await client.get(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+            headers=headers
+        )
+        return resp.json().get("items", [])
+```
+
 ### Phase 2: Vector Search & Knowledge Graph Mapping
 *   **Vector Database Store**: Integrate a vector store (such as Chroma or Pinecone) to create semantic embeddings of files indexed from OneDrive/Google Drive.
 *   **Knowledge Graph Linking**: Bind the visual SVG interface in `memory_explorer.html` to a graph database (like Neo4j), mapping connections between project files, stakeholders, and related calendar meetings.
+
+```python
+# Neo4j query model representation draft
+def link_entities_in_graph(tx, email_sender, calendar_meeting_id):
+    tx.run(
+        "MERGE (p:Person {email: $email_sender}) "
+        "MERGE (m:Meeting {id: $calendar_meeting_id}) "
+        "MERGE (p)-[:ATTENDED]->(m)",
+        email_sender=email_sender,
+        calendar_meeting_id=calendar_meeting_id
+    )
+```
 
 ### Phase 3: Proactive Alerts & Push Workflows
 *   **Push Notifications**: Connect the agent monitor to a WebPush server or Slack/Teams webhook, sending alerts when a critical risk is identified.
