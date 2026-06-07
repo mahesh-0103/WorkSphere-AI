@@ -389,6 +389,10 @@
                 padding: 0 24px;
             }
 
+            .hide-mobile {
+                display: none !important;
+            }
+
             .hero {
                 padding: 100px 12px 60px;
             }
@@ -531,7 +535,7 @@
                 <path d="M1 11h9v9H1z" fill="#00a4ef"/>
                 <path d="M11 11h9v9h-9z" fill="#ffb900"/>
             </svg>
-            <span>Sign in with Microsoft</span>
+            <span>Sign in<span class="hide-mobile"> with Microsoft</span></span>
         </button>
     </header>
 
@@ -549,7 +553,7 @@
                     <path d="M1 11h9v9H1z" fill="#00a4ef"/>
                     <path d="M11 11h9v9h-9z" fill="#ffb900"/>
                 </svg>
-                <span>Sign in with Microsoft</span>
+                <span>Sign in<span class="hide-mobile"> with Microsoft</span></span>
             </button>
 
             <div class="or-separator" style="margin: 16px auto; display: flex; align-items: center; justify-content: center; gap: 12px; max-width: 320px; width: 100%;">

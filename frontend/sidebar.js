@@ -34,7 +34,7 @@
 
     window.worksphere_token = token;
 
-    // 2. Inject Styles for Toast
+    // 2. Inject Styles for Toast & Mobile Drawer
     const toastStyle = document.createElement('style');
     toastStyle.textContent = `
         #worksphere-toast {
@@ -80,6 +80,73 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        /* Mobile Responsive Navigation styles */
+        @media (max-width: 767px) {
+            nav {
+                position: fixed !important;
+                top: 0 !important;
+                left: -220px !important;
+                width: 220px !important;
+                min-width: 220px !important;
+                height: 100vh !important;
+                z-index: 10000 !important;
+                background-color: #f9f9f9 !important;
+                transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                box-shadow: 4px 0 12px rgba(0,0,0,0.08) !important;
+            }
+            nav.open {
+                left: 0 !important;
+            }
+            #ws-sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 9999;
+                background-color: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(2px);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                pointer-events: none;
+            }
+            #ws-sidebar-backdrop.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            /* Telemetry & widget grid layout stack override */
+            .ws-telemetry-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            /* Responsive adjustments for footer */
+            footer {
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+            footer .flex.items-center.gap-md > span.font-code-sm,
+            footer .flex.items-center.gap-md > div.h-3 {
+                display: none !important;
+            }
+            footer .flex.items-center.gap-lg > span {
+                font-size: 10px !important;
+            }
+            
+            /* Main container padding adjustments on mobile */
+            main {
+                padding-top: 56px !important;
+                padding-bottom: 24px !important;
+            }
+        }
+
+        /* Table responsiveness wrapper auto-sizing */
+        .overflow-x-auto {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .overflow-x-auto table {
+            min-width: 600px;
+        }
     `;
     document.head.appendChild(toastStyle);
 
@@ -110,6 +177,53 @@
     // 4. Wire Sidebar Links & Highlights on DOM Load
     function setupInteractions() {
         const path = window.location.pathname;
+
+        // Mobile Responsive Navigation setup
+        const header = document.querySelector('header');
+        if (header && !document.getElementById('ws-hamburger-btn')) {
+            const sidebar = document.querySelector('nav');
+            if (sidebar) {
+                // Ensure backdrop overlay exists
+                let backdrop = document.getElementById('ws-sidebar-backdrop');
+                if (!backdrop) {
+                    backdrop = document.createElement('div');
+                    backdrop.id = 'ws-sidebar-backdrop';
+                    document.body.appendChild(backdrop);
+                }
+
+                // Create and insert hamburger toggle button
+                const toggleBtn = document.createElement('button');
+                toggleBtn.id = 'ws-hamburger-btn';
+                toggleBtn.className = 'p-1 mr-2 text-primary hover:bg-surface-container rounded-lg md:hidden flex items-center justify-center';
+                toggleBtn.innerHTML = '<span class="material-symbols-outlined text-[24px]">menu</span>';
+                toggleBtn.style.cursor = 'pointer';
+                toggleBtn.style.background = 'transparent';
+                toggleBtn.style.border = 'none';
+                toggleBtn.style.outline = 'none';
+
+                // Insert hamburger button at the start of header
+                header.insertBefore(toggleBtn, header.firstChild);
+
+                // Drawer toggle handlers
+                const toggleDrawer = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                    backdrop.classList.toggle('show');
+                };
+
+                toggleBtn.addEventListener('click', toggleDrawer);
+                backdrop.addEventListener('click', toggleDrawer);
+
+                // Close drawer when a navigation link is clicked
+                sidebar.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        sidebar.classList.remove('open');
+                        backdrop.classList.remove('show');
+                    });
+                });
+            }
+        }
 
         // Dynamically change 'Connect Account' to 'Logout' if token is present
         const connectBtn = document.getElementById('add-instance-btn') || document.getElementById('connect-account-btn');

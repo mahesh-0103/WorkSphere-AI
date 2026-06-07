@@ -181,15 +181,15 @@
         <span class="text-xs text-secondary font-medium">Analyst Operations</span>
     </div>
     <div class="flex items-center gap-3">
-        <div class="flex space-x-sm font-code-sm text-code-sm text-on-surface-variant" id="session-display-name" data-session-name>WorkSphere User</div>
-        <div class="h-4 w-px bg-outline-variant/50"></div>
-        <span class="flex items-center gap-1.5 text-xs text-secondary">
+        <div class="hidden sm:block font-code-sm text-code-sm text-on-surface-variant" id="session-display-name" data-session-name>WorkSphere User</div>
+        <div class="hidden sm:block h-4 w-px bg-outline-variant/50"></div>
+        <span class="hidden md:inline-flex items-center gap-1.5 text-xs text-secondary">
             <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
             All Analysts Ready
         </span>
         <button id="run-briefing-btn" class="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[15px]">play_circle</span>
-            Run Intelligence Briefing
+            <span class="hidden md:inline">Run Intelligence Briefing</span>
         </button>
     </div>
 </header>
