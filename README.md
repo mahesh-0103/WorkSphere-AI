@@ -16,7 +16,7 @@ A multi-agent AI workplace assistant that connects to Microsoft 365 and Google W
 
 ```
 worksphere-ai/
-├── static/                  ← Renamed from stitch_assets/
+├── frontend/                ← Renamed from stitch_assets/
 │   ├── landing_page.html
 │   ├── command_center.html
 │   ├── executive_intelligence.html

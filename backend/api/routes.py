@@ -689,7 +689,7 @@ import os
 from memory.cache import cache_client
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-STITCH_DIR = os.path.join(BASE_DIR, "static")
+STITCH_DIR = os.path.join(BASE_DIR, "frontend")
 
 @router.get("/api/intelligence/latest")
 async def get_latest_intelligence(token: str = Query(None), provider: str = Query("microsoft")):

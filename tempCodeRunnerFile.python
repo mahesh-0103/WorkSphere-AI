@@ -1,0 +1,801 @@
+import json
+import random
+from datetime import datetime, timedelta
+import re
+from typing import List, Dict, Any
+import hashlib
+
+class ImprovedTaskDataGenerator:
+    def __init__(self):
+        # Core components with more variety
+        self.names = [
+            "John", "Sarah", "Mike", "Emma", "David", "Lisa", "Alex", "Maria", "James", "Anna",
+            "Robert", "Sophie", "William", "Olivia", "Daniel", "Chloe", "Thomas", "Zoe", "Kevin", "Nina",
+            "Chris", "Rachel", "Steve", "Megan", "Paul", "Laura", "Mark", "Amy", "Brian", "Julia",
+            "Jason", "Nicole", "Eric", "Michelle", "Scott", "Rebecca", "Peter", "Angela", "Jeff", "Tina"
+        ]
+        
+        self.tasks = {
+            "development": [
+                "design the database schema", "implement the API endpoints", "create the frontend components",
+                "write unit tests", "fix the bugs in login", "optimize database queries", "set up the CI/CD pipeline",
+                "configure the server", "review pull requests", "deploy to staging", "create the authentication system",
+                "implement payment gateway", "build the dashboard UI", "set up monitoring tools", "create error handling",
+                "implement caching layer", "write migration scripts", "set up logging", "create API documentation",
+                "implement real-time features", "build the admin panel", "create user profile page", "setup WebSocket server"
+            ],
+            "design": [
+                "create wireframes", "design the logo", "update the color scheme", "create mockups",
+                "design the user flow", "create UI components", "design the dashboard", "create brand guidelines",
+                "design email templates", "create icon set", "design landing page", "create style guide",
+                "design mobile app interface", "create animation concepts", "design presentation deck"
+            ],
+            "documentation": [
+                "write documentation", "update the README", "create user manual", "document the API",
+                "write technical specs", "create installation guide", "write deployment guide",
+                "create troubleshooting guide", "document code comments", "write release notes"
+            ],
+            "marketing": [
+                "write blog post", "create social media content", "design email campaign",
+                "prepare presentation", "create marketing materials", "update website content",
+                "create video tutorial", "write case study", "design newsletter", "create ad copy"
+            ],
+            "analysis": [
+                "analyze user feedback", "create analytics dashboard", "generate reports",
+                "conduct user interviews", "perform market research", "analyze competitor data",
+                "run A/B tests", "analyze customer surveys", "track user behavior", "measure KPIs"
+            ],
+            "planning": [
+                "create project timeline", "define sprint goals", "plan next release",
+                "estimate story points", "prioritize backlog", "create roadmap",
+                "plan sprint retrospective", "define acceptance criteria", "create user stories",
+                "plan resource allocation", "schedule team meetings", "define milestones"
+            ],
+            "testing": [
+                "run integration tests", "perform load testing", "conduct security audit",
+                "test cross-browser compatibility", "validate user acceptance", "check accessibility",
+                "test mobile responsiveness", "verify data integrity", "perform regression testing",
+                "validate API endpoints", "test backup recovery", "check performance metrics"
+            ]
+        }
+        
+        # Flatten tasks for random selection but keep category info
+        self.all_tasks = []
+        self.task_categories = {}
+        for category, task_list in self.tasks.items():
+            for task in task_list:
+                self.all_tasks.append(task)
+                self.task_categories[task] = category
+        
+        self.deadlines = {
+            "specific": [
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+                "March 15", "April 1", "May 5", "June 10", "July 20", "August 15", "September 1",
+                "October 10", "November 5", "December 15", "January 20", "February 28"
+            ],
+            "relative": [
+                "tomorrow", "next week", "end of month", "end of week", "next Monday", 
+                "next Friday", "this Friday", "this Thursday", "next Tuesday"
+            ],
+            "vague": [
+                "ASAP", "soon", "when ready", "when possible", "by deadline", 
+                "before release", "for launch", "by next milestone"
+            ]
+        }
+        
+        # Flatten deadlines for selection
+        self.all_deadlines = []
+        for dl_list in self.deadlines.values():
+            self.all_deadlines.extend(dl_list)
+        
+        self.priorities = ["low", "medium", "high", "critical"]
+        
+        # Dependency patterns with clear indicators
+        self.dependency_patterns = [
+            # Clear sequential
+            ("after {task1} is complete", "depends_on_previous"),
+            ("once {task1} finishes", "depends_on_previous"),
+            ("following {task1}", "depends_on_previous"),
+            ("when {task1} is done", "depends_on_previous"),
+            ("post {task1} completion", "depends_on_previous"),
+            ("as soon as {task1} is ready", "depends_on_previous"),
+            
+            # Explicit dependencies
+            ("depends on {task1}", "explicit_dependency"),
+            ("blocked by {task1}", "explicit_dependency"),
+            ("waiting for {task1}", "explicit_dependency"),
+            ("requires {task1} first", "explicit_dependency"),
+            ("can't start until {task1}", "explicit_dependency"),
+            
+            # Parallel indicators
+            ("while {person1} does {task1}", "parallel"),
+            ("simultaneously with {task1}", "parallel"),
+            ("in parallel to {task1}", "parallel"),
+            ("concurrently with {task1}", "parallel")
+        ]
+        
+        # Sentence patterns with better structure
+        self.patterns = [
+            # Active voice
+            "{person} will {task} by {deadline}.",
+            "{person} needs to {task} before {deadline}.",
+            "{person} should complete {task} by {deadline}.",
+            "{person} is responsible for {task} with {deadline} deadline.",
+            "{person} has to finish {task} no later than {deadline}.",
+            
+            # Passive voice
+            "The {task} will be handled by {person} and completed by {deadline}.",
+            "{task} needs to be done by {person} before {deadline}.",
+            "{task} is assigned to {person} with a target of {deadline}.",
+            
+            # Casual
+            "Hey {person}, can you take care of {task} by {deadline}?",
+            "{person} agreed to handle {task} and finish it by {deadline}.",
+            "Let's have {person} own {task} and deliver by {deadline}.",
+            
+            # Formal
+            "Per our discussion, {person} will be accountable for {task} with a {deadline} delivery date.",
+            "Action item: {person} to complete {task} by {deadline}.",
+            "Assignment: {person} owns {task} with {deadline} target.",
+            
+            # Urgent
+            "It's critical that {person} completes {task} by {deadline}.",
+            "Top priority: {person} must deliver {task} before {deadline}.",
+            "We urgently need {person} to finish {task} by {deadline}."
+        ]
+        
+        # Multi-task patterns with clear dependencies
+        self.multi_patterns = [
+            # Sequential with explicit dependencies
+            "{person1} will complete {task1} by {deadline1}. After that, {person2} will start {task2} and finish by {deadline2}.",
+            "First, {person1} needs to finish {task1} by {deadline1}. Then {person2} can begin {task2} with target {deadline2}.",
+            "The plan: {person1} handles {task1} ({deadline1}), followed by {person2} taking {task2} ({deadline2}).",
+            "{person1} must deliver {task1} by {deadline1}. Once that's done, {person2} will work on {task2} and complete by {deadline2}.",
+            
+            # Parallel tasks
+            "{person1} will work on {task1} while {person2} handles {task2}. Both need to be done by {deadline1}.",
+            "In parallel, {person1} does {task1} and {person2} does {task2}. Target completion: {deadline1}.",
+            "Simultaneously, {person1} takes {task1} and {person2} takes {task2}, both due {deadline1}.",
+            
+            # Complex dependencies
+            "{person1} starts with {task1} ({deadline1}). This enables {person2} to do {task2} ({deadline2}), which then allows {person3} to handle {task3} ({deadline3}).",
+            "The workflow: {person1} → {task1} ({deadline1}) → {person2} → {task2} ({deadline2}) → {person3} → {task3} ({deadline3}).",
+            "{task1} by {person1} ({deadline1}) is the prerequisite for {task2} by {person2} ({deadline2}), which is needed for {task3} by {person3} ({deadline3}).",
+            
+            # Multiple tasks per person
+            "{person1} will handle both {task1} and {task2} by {deadline1}. Then {person2} will take over with {task3} by {deadline2}.",
+            "{person1} needs to complete {task1} and {task2} ({deadline1}) before {person2} can start {task3} ({deadline2}).",
+            
+            # Meeting style
+            "Okay, so {person1} you're on {task1} due {deadline1}, then {person2} you do {task2} after that, target {deadline2}. Got it?",
+            "Right: {person1} does {task1} by {deadline1}, then {person2} follows with {task2} by {deadline2}, and finally {person3} wraps up {task3} by {deadline3}."
+        ]
+        
+        # Edge cases with meaningful outputs
+        self.edge_cases = [
+            # Missing owner but clear task
+            ("The {task} needs to be completed by {deadline}.", {"owner": "unassigned"}),
+            ("We need {task} finished before {deadline}.", {"owner": "unassigned"}),
+            ("Someone should handle {task} by {deadline}.", {"owner": "unassigned"}),
+            ("{task} is required by {deadline} - who can take it?", {"owner": "unassigned"}),
+            
+            # Missing deadline but clear owner/task
+            ("{person} will work on {task} soon.", {"deadline": "unknown"}),
+            ("{person} is starting {task} imminently.", {"deadline": "unknown"}),
+            ("{person} agreed to take care of {task}.", {"deadline": "unknown"}),
+            ("Assign {task} to {person} - no deadline set.", {"deadline": "unknown"}),
+            
+            # Vague deadlines
+            ("{person} should complete {task} as soon as possible.", {"deadline": "ASAP"}),
+            ("{person} needs to get {task} done at some point.", {"deadline": "unknown"}),
+            ("{person} will eventually handle {task}.", {"deadline": "unknown"}),
+            ("{person} aims to finish {task} when they have time.", {"deadline": "unknown"}),
+            
+            # No clear task
+            ("We need to discuss the project timeline.", {"task": "unknown", "owner": "unassigned", "deadline": "unknown"}),
+            ("Let's circle back on this next week.", {"task": "unknown", "owner": "unassigned", "deadline": "unknown"}),
+            ("Important meeting coming up.", {"task": "unknown", "owner": "unassigned", "deadline": "unknown"}),
+            
+            # Multiple vague items
+            ("John will handle the documentation, and we need the design done too.", {"multi": True}),
+            ("Sarah is on development, Mike on testing. Both critical.", {"multi": True})
+        ]
+
+    def normalize_deadline(self, deadline: str) -> str:
+        """Normalize deadline format"""
+        if not deadline or deadline == "unknown":
+            return "unknown"
+        
+        deadline = deadline.lower().strip()
+        
+        # Remove common prefixes
+        deadline = re.sub(r'^(by|before|on|for|until|no later than)\s+', '', deadline)
+        
+        # Handle special cases
+        if "as soon as possible" in deadline or "asap" in deadline:
+            return "ASAP"
+        if "eventually" in deadline or "sometime" in deadline or "when possible" in deadline:
+            return "unknown"
+        if "end of" in deadline:
+            if "week" in deadline:
+                return "end_of_week"
+            if "month" in deadline:
+                return "end_of_month"
+            if "sprint" in deadline:
+                return "end_of_sprint"
+        
+        # Capitalize properly
+        return deadline.title()
+
+    def normalize_task(self, task: str) -> str:
+        """Normalize task description"""
+        if not task or task == "unknown":
+            return "unknown"
+        
+        # Remove articles and clean up
+        task = task.strip()
+        task = re.sub(r'^(the|a|an)\s+', '', task, flags=re.IGNORECASE)
+        
+        # Ensure first letter capitalized
+        return task[0].upper() + task[1:] if task else "unknown"
+
+    def infer_priority(self, text: str, task: str = "") -> str:
+        """Infer priority based on text content"""
+        text_lower = text.lower()
+        task_lower = task.lower()
+        
+        # High priority indicators
+        high_indicators = [
+            'critical', 'urgent', 'asap', 'immediately', 'top priority',
+            'must', 'essential', 'blocker', 'blocking', 'deadline',
+            'crucial', 'vital', 'important', 'key', 'major'
+        ]
+        
+        # Low priority indicators
+        low_indicators = [
+            'eventually', 'when possible', 'if time', 'nice to have',
+            'optional', 'maybe', 'perhaps', 'consider', 'backlog'
+        ]
+        
+        # Check text and task
+        for indicator in high_indicators:
+            if indicator in text_lower or indicator in task_lower:
+                return "high"
+        
+        for indicator in low_indicators:
+            if indicator in text_lower or indicator in task_lower:
+                return "low"
+        
+        # Check for specific task categories
+        if task in self.task_categories:
+            category = self.task_categories[task]
+            if category in ['development', 'testing', 'security']:
+                return "high"
+            if category in ['documentation', 'analysis']:
+                return "medium"
+        
+        # Default
+        return random.choice(["medium", "high"])  # Slightly biased toward medium/high
+
+    def generate_task_entry(self, task_id: int, task: str, owner: str, deadline: str, 
+                           priority: str = None, depends_on: List[int] = None) -> Dict[str, Any]:
+        """Generate a single task entry with normalized fields"""
+        return {
+            "task_id": task_id,
+            "task": self.normalize_task(task),
+            "owner": owner if owner else "unassigned",
+            "deadline": self.normalize_deadline(deadline),
+            "priority": priority if priority else "medium",
+            "depends_on": depends_on if depends_on else []
+        }
+
+    def generate_simple_sample(self, sample_id: int) -> Dict[str, Any]:
+        """Generate a simple single-task sample"""
+        person = random.choice(self.names)
+        task = random.choice(self.all_tasks)
+        deadline = random.choice(self.all_deadlines)
+        
+        pattern = random.choice(self.patterns)
+        sentence = pattern.format(person=person, task=task, deadline=deadline)
+        
+        # Occasionally add urgency indicators
+        if random.random() < 0.2:
+            urgency_phrases = ["urgently", "as soon as possible", "critical", "top priority"]
+            sentence = sentence.replace(".", f" {random.choice(urgency_phrases)}.")
+        
+        # Infer priority from sentence
+        priority = self.infer_priority(sentence, task)
+        
+        tasks = [self.generate_task_entry(0, task, person, deadline, priority)]
+        
+        return {
+            "id": sample_id,
+            "input": f"Extract structured tasks from the following meeting text: {sentence}",
+            "output": json.dumps(tasks, indent=2),
+            "type": "simple",
+            "num_tasks": 1
+        }
+
+    def generate_multi_sample(self, sample_id: int) -> Dict[str, Any]:
+        """Generate a multi-task sample with proper dependencies"""
+        pattern = random.choice(self.multi_patterns)
+        
+        # Determine number of tasks needed (2-4)
+        num_tasks = random.randint(2, 4)
+        
+        people = [random.choice(self.names) for _ in range(num_tasks)]
+        tasks = [random.choice(self.all_tasks) for _ in range(num_tasks)]
+        deadlines = [random.choice(self.all_deadlines) for _ in range(num_tasks)]
+        
+        # Build placeholder dictionary
+        placeholders = {}
+        for i in range(num_tasks):
+            placeholders[f"person{i+1}"] = people[i]
+            placeholders[f"task{i+1}"] = tasks[i]
+            placeholders[f"deadline{i+1}"] = deadlines[i]
+        
+        # Fill sentence
+        sentence = pattern
+        for key, value in placeholders.items():
+            sentence = sentence.replace("{" + key + "}", str(value))
+        
+        # Generate structured tasks with dependencies
+        tasks_list = []
+        
+        # First task (no dependency)
+        priority1 = self.infer_priority(sentence, tasks[0])
+        task1 = self.generate_task_entry(0, tasks[0], people[0], deadlines[0], priority1)
+        tasks_list.append(task1)
+        
+        # Subsequent tasks with dependencies
+        for i in range(1, num_tasks):
+            # Determine dependency type based on pattern and position
+            if "after" in sentence.lower() or "then" in sentence.lower() or "follow" in sentence.lower():
+                # Sequential - depends on previous
+                depends_on = [i-1]
+            elif "parallel" in sentence.lower() or "simultaneously" in sentence.lower() or "while" in sentence.lower():
+                # Parallel - depends on first task only if specified
+                depends_on = [0] if random.random() < 0.3 else []
+            else:
+                # Mixed - sometimes depends on previous, sometimes on first
+                depends_on = [i-1] if random.random() < 0.7 else ([0] if random.random() < 0.5 else [])
+            
+            priority = self.infer_priority(sentence, tasks[i])
+            task = self.generate_task_entry(i, tasks[i], people[i], deadlines[i], priority, depends_on)
+            tasks_list.append(task)
+        
+        return {
+            "id": sample_id,
+            "input": f"Extract structured tasks from the following meeting text: {sentence}",
+            "output": json.dumps(tasks_list, indent=2),
+            "type": "multi",
+            "num_tasks": num_tasks
+        }
+
+    def generate_edge_sample(self, sample_id: int) -> Dict[str, Any]:
+        """Generate edge cases with meaningful outputs"""
+        edge_pattern, modifiers = random.choice(self.edge_cases)
+        
+        # Fill placeholders
+        sentence = edge_pattern
+        if "{task}" in sentence:
+            task = random.choice(self.all_tasks)
+            sentence = sentence.replace("{task}", task)
+        else:
+            task = "unknown"
+            
+        if "{person}" in sentence:
+            person = random.choice(self.names)
+            sentence = sentence.replace("{person}", person)
+        else:
+            person = "unassigned"
+            
+        if "{deadline}" in sentence:
+            deadline = random.choice(self.all_deadlines)
+            sentence = sentence.replace("{deadline}", deadline)
+        else:
+            deadline = "unknown"
+        
+        # Apply modifiers
+        if "owner" in modifiers:
+            person = modifiers["owner"]
+        if "deadline" in modifiers:
+            deadline = modifiers["deadline"]
+        if "task" in modifiers:
+            task = modifiers["task"]
+        
+        # Handle multi-task edge cases
+        if modifiers.get("multi"):
+            # Create multiple tasks from the edge case
+            tasks_list = []
+            task_pairs = [
+                ("documentation", "John", "Friday"),
+                ("design", "Sarah", "Monday")
+            ]
+            for i, (t, p, d) in enumerate(task_pairs):
+                priority = self.infer_priority(sentence, t)
+                tasks_list.append(self.generate_task_entry(i, t, p, d, priority))
+            
+            return {
+                "id": sample_id,
+                "input": f"Extract structured tasks from the following meeting text: {sentence}",
+                "output": json.dumps(tasks_list, indent=2),
+                "type": "edge_multi",
+                "num_tasks": len(tasks_list)
+            }
+        
+        # Single task edge case
+        priority = self.infer_priority(sentence, task)
+        tasks = [self.generate_task_entry(0, task, person, deadline, priority)]
+        
+        return {
+            "id": sample_id,
+            "input": f"Extract structured tasks from the following meeting text: {sentence}",
+            "output": json.dumps(tasks, indent=2),
+            "type": "edge",
+            "num_tasks": 1
+        }
+
+    def generate_complex_chain_sample(self, sample_id: int) -> Dict[str, Any]:
+        """Generate complex dependency chains (3-6 tasks)"""
+        num_tasks = random.randint(3, 6)
+        
+        # Generate people and tasks
+        people = [random.choice(self.names) for _ in range(num_tasks)]
+        tasks = [random.choice(self.all_tasks) for _ in range(num_tasks)]
+        deadlines = [random.choice(self.all_deadlines) for _ in range(num_tasks)]
+        
+        # Create complex dependency structure
+        # Can be: linear chain, branched, or parallel with dependencies
+        structure_type = random.choice(["linear", "branched", "mixed"])
+        
+        tasks_list = []
+        
+        if structure_type == "linear":
+            # Simple linear chain
+            for i in range(num_tasks):
+                depends_on = [i-1] if i > 0 else []
+                priority = self.infer_priority("", tasks[i])
+                tasks_list.append(self.generate_task_entry(i, tasks[i], people[i], 
+                                                          deadlines[i], priority, depends_on))
+            
+            # Generate natural language description
+            descriptions = []
+            for i in range(num_tasks):
+                if i == 0:
+                    descriptions.append(f"{people[i]} starts with {tasks[i]} by {deadlines[i]}")
+                else:
+                    descriptions.append(f"then {people[i]} does {tasks[i]} by {deadlines[i]}")
+            
+            sentence = f"{', '.join(descriptions[:-1])}, and finally {descriptions[-1]}."
+            
+        elif structure_type == "branched":
+            # Branched dependencies (task 2 depends on 1, task 3 depends on 1, task 4 depends on 2&3)
+            for i in range(num_tasks):
+                if i == 0:
+                    depends_on = []
+                elif i == 1 or i == 2:
+                    depends_on = [0]
+                else:
+                    depends_on = [1, 2]  # Depends on both branch tasks
+                
+                priority = self.infer_priority("", tasks[i])
+                tasks_list.append(self.generate_task_entry(i, tasks[i], people[i], 
+                                                          deadlines[i], priority, depends_on))
+            
+            sentence = f"{people[0]} handles {tasks[0]} by {deadlines[0]}. " + \
+                      f"Meanwhile, {people[1]} and {people[2]} work on {tasks[1]} and {tasks[2]} in parallel. " + \
+                      f"Once both are done, {people[3]} takes on {tasks[3]} by {deadlines[3]}."
+            
+        else:  # mixed
+            # Mixed dependencies (some sequential, some parallel)
+            for i in range(num_tasks):
+                if i == 0:
+                    depends_on = []
+                elif i == 1:
+                    depends_on = [0]
+                elif i == 2:
+                    depends_on = [0]  # Parallel to task 1
+                elif i == 3:
+                    depends_on = [1, 2]  # Depends on both
+                else:
+                    depends_on = [i-1]  # Sequential for rest
+                
+                priority = self.infer_priority("", tasks[i])
+                tasks_list.append(self.generate_task_entry(i, tasks[i], people[i], 
+                                                          deadlines[i], priority, depends_on))
+            
+            sentence = f"Complex workflow: {people[0]} does {tasks[0]} by {deadlines[0]}. " + \
+                      f"Then {people[1]} handles {tasks[1]} while {people[2]} simultaneously works on {tasks[2]}. " + \
+                      f"After both complete, {people[3]} takes {tasks[3]} by {deadlines[3]}."
+        
+        return {
+            "id": sample_id,
+            "input": f"Extract structured tasks from the following meeting text: {sentence}",
+            "output": json.dumps(tasks_list, indent=2),
+            "type": f"complex_{structure_type}",
+            "num_tasks": num_tasks
+        }
+
+    def generate_real_meeting_sample(self, sample_id: int) -> Dict[str, Any]:
+        """Generate realistic meeting transcript style samples"""
+        meeting_styles = [
+            # Casual team meeting
+            "Okay team, let's review our tasks. {person1}, you're on {task1} - need that by {deadline1}. {person2}, after that, you'll handle {task2} - target {deadline2}. And {person3}, you'll take {task3} whenever {task2} is done. Cool?",
+            
+            # Scrum meeting
+            "Daily standup: {person1} completed {task1}, now starting {task2} due {deadline1}. {person2} is blocked on {task3} until {person1} finishes {task2}. {person3} will begin {task4} after the blocker is resolved.",
+            
+            # Planning meeting
+            "For the next sprint: {person1} takes {task1} (high priority, due {deadline1}). {person2} handles {task2} (blocks {task3}). {person3} picks up {task4} once {task2} is ready. All good?",
+            
+            # Status update
+            "Status update: {person1} is making progress on {task1} - should be done by {deadline1}. {person2} will then start {task2}, aiming for {deadline2}. {person3} is waiting to begin {task3} until after {task2}.",
+            
+            # Project kickoff
+            "Project kickoff: {person1} owns {task1} (deadline: {deadline1}). This enables {person2} to work on {task2} ({deadline2}). {person3} will handle {task3} in parallel with {task2}. Final delivery by {person4} with {task4} after both complete."
+        ]
+        
+        pattern = random.choice(meeting_styles)
+        
+        # Determine number of people/tasks needed
+        num_people = pattern.count("{person")
+        num_tasks = pattern.count("{task")
+        num_deadlines = pattern.count("{deadline")
+        
+        people = [random.choice(self.names) for _ in range(num_people)]
+        tasks = [random.choice(self.all_tasks) for _ in range(num_tasks)]
+        deadlines = [random.choice(self.all_deadlines) for _ in range(num_deadlines)]
+        
+        # Fill placeholders
+        placeholders = {}
+        for i in range(num_people):
+            placeholders[f"person{i+1}"] = people[i]
+        for i in range(num_tasks):
+            placeholders[f"task{i+1}"] = tasks[i]
+        for i in range(num_deadlines):
+            placeholders[f"deadline{i+1}"] = deadlines[i]
+        
+        sentence = pattern
+        for key, value in placeholders.items():
+            sentence = sentence.replace("{" + key + "}", str(value))
+        
+        # Generate tasks with dependencies based on context
+        tasks_list = []
+        
+        # Simple dependency logic for meeting samples
+        for i in range(min(num_people, num_tasks)):
+            # Determine dependencies from sentence
+            depends_on = []
+            if i > 0 and ("after that" in sentence.lower() or "then" in sentence.lower() or "once" in sentence.lower()):
+                if i < len(tasks_list):
+                    depends_on = [i-1]
+            
+            priority = self.infer_priority(sentence, tasks[i] if i < len(tasks) else "")
+            task_entry = self.generate_task_entry(
+                i, 
+                tasks[i] if i < len(tasks) else "unknown",
+                people[i] if i < len(people) else "unassigned",
+                deadlines[i] if i < len(deadlines) else "unknown",
+                priority,
+                depends_on
+            )
+            tasks_list.append(task_entry)
+        
+        return {
+            "id": sample_id,
+            "input": f"Extract structured tasks from the following meeting text: {sentence}",
+            "output": json.dumps(tasks_list, indent=2),
+            "type": "real_meeting",
+            "num_tasks": len(tasks_list)
+        }
+
+    def generate_dataset(self, num_samples: int = 2100) -> List[Dict[str, Any]]:
+        """Generate the full dataset with specified number of samples"""
+        dataset = []
+        
+        # Distribution of sample types
+        distributions = [
+            ("simple", 0.25, self.generate_simple_sample),
+            ("multi", 0.30, self.generate_multi_sample),
+            ("edge", 0.15, self.generate_edge_sample),
+            ("complex", 0.15, self.generate_complex_chain_sample),
+            ("real_meeting", 0.15, self.generate_real_meeting_sample)
+        ]
+        
+        samples_per_type = {name: int(num_samples * prob) for name, prob, _ in distributions}
+        
+        # Ensure we hit exactly num_samples
+        total = sum(samples_per_type.values())
+        if total < num_samples:
+            samples_per_type["multi"] += num_samples - total
+        
+        # Generate samples
+        sample_id = 0
+        for sample_type, count, generator_func in distributions:
+            for _ in range(samples_per_type[sample_type]):
+                if sample_id >= num_samples:
+                    break
+                sample = generator_func(sample_id)
+                dataset.append(sample)
+                sample_id += 1
+        
+        # Shuffle for randomness
+        random.shuffle(dataset)
+        
+        return dataset
+
+    def validate_dataset(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Run comprehensive quality checks"""
+        stats = {
+            "total_samples": len(dataset),
+            "by_type": {},
+            "total_tasks": 0,
+            "valid_json": 0,
+            "has_dependencies": 0,
+            "missing_owner": 0,
+            "missing_deadline": 0,
+            "invalid_dependencies": 0,
+            "priority_distribution": {"low": 0, "medium": 0, "high": 0, "critical": 0},
+            "dependency_types": {"none": 0, "single": 0, "multiple": 0}
+        }
+        
+        for sample in dataset:
+            # Count by type
+            sample_type = sample.get("type", "unknown")
+            stats["by_type"][sample_type] = stats["by_type"].get(sample_type, 0) + 1
+            
+            # Validate JSON and analyze tasks
+            try:
+                tasks = json.loads(sample["output"])
+                stats["valid_json"] += 1
+                stats["total_tasks"] += len(tasks)
+                
+                task_ids = set()
+                for task in tasks:
+                    # Check required fields
+                    if "task_id" not in task:
+                        stats["invalid_dependencies"] += 1
+                    
+                    # Track missing fields
+                    if task.get("owner") in ["unassigned", "unknown"]:
+                        stats["missing_owner"] += 1
+                    if task.get("deadline") in ["unknown", "ASAP"]:
+                        stats["missing_deadline"] += 1
+                    
+                    # Track priority
+                    priority = task.get("priority", "medium")
+                    stats["priority_distribution"][priority] = stats["priority_distribution"].get(priority, 0) + 1
+                    
+                    # Track dependencies
+                    depends_on = task.get("depends_on", [])
+                    if depends_on:
+                        stats["has_dependencies"] += 1
+                        if len(depends_on) == 1:
+                            stats["dependency_types"]["single"] += 1
+                        else:
+                            stats["dependency_types"]["multiple"] += 1
+                        
+                        # Validate dependency IDs exist
+                        for dep_id in depends_on:
+                            if dep_id not in task_ids and dep_id is not None:
+                                stats["invalid_dependencies"] += 1
+                    
+                    task_ids.add(task["task_id"])
+                    
+            except json.JSONDecodeError:
+                print(f"Invalid JSON in sample {sample['id']}")
+        
+        # Calculate averages
+        stats["avg_tasks_per_sample"] = stats["total_tasks"] / stats["total_samples"]
+        stats["dependency_percentage"] = (stats["has_dependencies"] / stats["total_tasks"]) * 100
+        
+        return stats
+
+    def save_dataset(self, dataset: List[Dict[str, Any]], base_filename: str = "task_extraction_dataset"):
+        """Save dataset in multiple formats"""
+        
+        # Full dataset with metadata
+        with open(f"{base_filename}_full.json", 'w') as f:
+            json.dump(dataset, f, indent=2)
+        print(f"✅ Full dataset saved to {base_filename}_full.json")
+        
+        # Training format (just input/output)
+        training_data = []
+        for sample in dataset:
+            training_data.append({
+                "input": sample["input"],
+                "output": sample["output"]
+            })
+        
+        with open(f"{base_filename}_training.json", 'w') as f:
+            json.dump(training_data, f, indent=2)
+        print(f"✅ Training data saved to {base_filename}_training.json")
+        
+        # HuggingFace format (JSONL)
+        with open(f"{base_filename}_hf.jsonl", 'w') as f:
+            for sample in training_data:
+                f.write(json.dumps(sample) + '\n')
+        print(f"✅ HuggingFace format saved to {base_filename}_hf.jsonl")
+        
+        # Statistics
+        stats = self.validate_dataset(dataset)
+        with open(f"{base_filename}_stats.json", 'w') as f:
+            json.dump(stats, f, indent=2)
+        print(f"✅ Statistics saved to {base_filename}_stats.json")
+
+def print_sample_analysis(dataset: List[Dict[str, Any]], num_samples: int = 5):
+    """Print detailed analysis of random samples"""
+    print("\n" + "="*80)
+    print("📊 SAMPLE ANALYSIS")
+    print("="*80)
+    
+    samples = random.sample(dataset, min(num_samples, len(dataset)))
+    
+    for i, sample in enumerate(samples):
+        print(f"\n🔹 SAMPLE {i+1} (Type: {sample['type']})")
+        print("-" * 50)
+        print(f"📝 Input: {sample['input'][:150]}...")
+        print(f"📤 Output:")
+        
+        try:
+            tasks = json.loads(sample['output'])
+            for task in tasks:
+                print(f"  • Task {task['task_id']}: {task['task']}")
+                print(f"    Owner: {task['owner']}, Deadline: {task['deadline']}, Priority: {task['priority']}")
+                if task['depends_on']:
+                    print(f"    Depends on: {task['depends_on']}")
+        except:
+            print(f"  Error parsing output")
+        
+        print("-" * 50)
+
+# Generate the dataset
+print("🚀 Generating improved task extraction dataset...")
+print("="*60)
+
+generator = ImprovedTaskDataGenerator()
+
+# Generate 2100 samples (to ensure >2000 after validation)
+dataset = generator.generate_dataset(2100)
+
+# Validate
+stats = generator.validate_dataset(dataset)
+
+# Print statistics
+print("\n📊 DATASET STATISTICS")
+print("="*60)
+for key, value in stats.items():
+    if isinstance(value, float):
+        print(f"{key}: {value:.2f}")
+    elif isinstance(value, dict):
+        print(f"{key}:")
+        for k, v in value.items():
+            print(f"  {k}: {v}")
+    else:
+        print(f"{key}: {value}")
+
+# Save dataset
+print("\n💾 Saving dataset...")
+generator.save_dataset(dataset, "improved_task_extraction_dataset")
+
+# Show sample analysis
+print_sample_analysis(dataset, 5)
+
+print("\n" + "="*60)
+print(f"✅ SUCCESS! Generated {len(dataset)} high-quality samples")
+print("="*60)
+
+# Additional verification
+print("\n🔍 QUALITY CHECKS:")
+print(f"• Valid JSON rate: {stats['valid_json']/stats['total_samples']*100:.1f}%")
+print(f"• Tasks with dependencies: {stats['dependency_percentage']:.1f}%")
+print(f"• Missing owners (intentional): {stats['missing_owner']/stats['total_tasks']*100:.1f}%")
+print(f"• Missing deadlines (intentional): {stats['missing_deadline']/stats['total_tasks']*100:.1f}%")
+
+# Generate a quick sample of the first few for preview
+print("\n📋 FIRST 3 SAMPLES PREVIEW:")
+for i in range(min(3, len(dataset))):
+    print(f"\nSample {i+1}:")
+    print(f"Input: {dataset[i]['input'][:100]}...")
+    print(f"Output: {dataset[i]['output'][:200]}...")
