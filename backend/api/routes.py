@@ -30,13 +30,14 @@ def login():
         raise HTTPException(status_code=500, detail=f"Failed to generate auth URL: {str(e)}")
 
 @router.get("/auth/callback")
-def callback(code: str = Query(None)):
+def callback(request: Request, code: str = Query(None)):
     if not code:
         raise HTTPException(status_code=400, detail="Missing authorization code")
     try:
         access_token = get_token_from_code(code)
-        # Redirect user back to the frontend dashboard
-        redirect_url = f"{settings.frontend_url}/dashboard?token={access_token}"
+        # Redirect user back to the frontend dashboard dynamically based on the request host
+        base_url = str(request.base_url).rstrip('/')
+        redirect_url = f"{base_url}/dashboard?token={access_token}"
         return RedirectResponse(url=redirect_url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")
@@ -77,8 +78,9 @@ async def google_callback(code: str, request: Request):
         print(f"[AUTH WARNING] Exception during Google scope validation: {se}")
 
     # Redirect to frontend dashboard with token and provider flag
+    base_url = str(request.base_url).rstrip('/')
     return RedirectResponse(
-        f"http://localhost:8000/dashboard?token={access_token}&provider=google"
+        f"{base_url}/dashboard?token={access_token}&provider=google"
     )
 
 @router.post("/auth/logout")

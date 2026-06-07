@@ -41,7 +41,8 @@ SCOPES = [
     "Tasks.Read",
 ]
 
-REDIRECT_URI = "http://localhost:8000/auth/callback"
+BASE_URL = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("BASE_URL") or "http://localhost:8000"
+REDIRECT_URI = f"{BASE_URL.rstrip('/')}/auth/callback"
 
 router = APIRouter()
 

@@ -4,7 +4,8 @@ import httpx
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
-REDIRECT_URI = "http://localhost:8000/auth/google/callback"
+BASE_URL = os.getenv("RENDER_EXTERNAL_URL") or os.getenv("BASE_URL") or "http://localhost:8000"
+REDIRECT_URI = f"{BASE_URL.rstrip('/')}/auth/google/callback"
 SCOPES = "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly https://www.googleapis.com/auth/drive.readonly openid email profile"
 
 def get_google_auth_url() -> str:
