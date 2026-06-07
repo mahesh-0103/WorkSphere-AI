@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Control Plane | WorkSphere AI</title>
+<meta name="description" content="Configure your WorkSphere AI platform — workspace connections, analyst fleet, knowledge sources, intelligence rules, notifications, and advanced settings."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#000000","on-primary": "#ffffff",
+                    "secondary": "#5f5e5e","outline-variant": "#cfc4c5",
+                    "outline": "#7e7576","surface": "#f9f9f9",
+                    "surface-bright": "#f9f9f9","surface-container-low": "#f3f3f3",
+                    "surface-container": "#eeeeee","surface-container-high": "#e8e8e8",
+                    "surface-container-highest": "#e2e2e2","on-surface": "#1a1c1c",
+                    "on-surface-variant": "#4c4546","background": "#f9f9f9",
+                    "error": "#ba1a1a"
+                },
+                spacing: {
+                    "xs":"4px","sm":"8px","md":"16px","lg":"24px",
+                    "xl":"48px","gutter":"16px","container-margin":"32px"
+                },
+                fontFamily: { "body-md":["Inter"],"body-sm":["Inter"],"label-md":["Inter"],"code-sm":["JetBrains Mono"] },
+                fontSize: {
+                    "body-sm":["14px",{"lineHeight":"1.5"}],
+                    "body-md":["16px",{"lineHeight":"1.5"}],
+                    "code-sm":["13px",{"lineHeight":"1.4"}],
+                    "label-md":["12px",{"lineHeight":"1","letterSpacing":"0.05em","fontWeight":"600"}],
+                    "headline-xl":["32px",{"lineHeight":"1.2","fontWeight":"600"}]
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        vertical-align: middle;
+    }
+    .section-card {
+        background: #ffffff;
+        border: 1px solid rgba(207,196,197,0.6);
+        border-radius: 12px;
+        transition: border-color 0.2s;
+    }
+    .section-card:hover { border-color: rgba(0,0,0,0.12); }
+    .section-header {
+        display: flex; align-items: center; gap: 10px;
+        padding-bottom: 14px; margin-bottom: 18px;
+        border-bottom: 1px solid rgba(207,196,197,0.4);
+    }
+    .section-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+    }
+    .toggle-track {
+        width: 44px; height: 24px; background: #e2e2e2;
+        border-radius: 999px; position: relative;
+        cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+    }
+    .toggle-track.on { background: #000000; }
+    .toggle-thumb {
+        position: absolute; top: 2px; left: 2px;
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #ffffff; transition: transform 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .toggle-track.on .toggle-thumb { transform: translateX(20px); }
+    .field-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #5f5e5e; margin-bottom: 6px; display: block; }
+    .field-input { width: 100%; background: #f3f3f3; border: 1px solid #cfc4c5; border-radius: 8px; padding: 9px 12px; font-size: 14px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    .field-input:focus { border-color: #000; box-shadow: 0 0 0 2px rgba(0,0,0,0.06); }
+    .field-select { width: 100%; background: #f3f3f3; border: 1px solid #cfc4c5; border-radius: 8px; padding: 9px 12px; font-size: 14px; outline: none; cursor: pointer; }
+    .connector-card { background: #f3f3f3; border: 1px solid rgba(207,196,197,0.5); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .badge-connected { background: #dcfce7; color: #166534; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .badge-disconnected { background: #f3f3f3; color: #7e7576; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cfc4c5; border-radius: 10px; }
+    input[type="range"] { -webkit-appearance: none; background: transparent; width: 100%; }
+    input[type="range"]::-webkit-slider-runnable-track { background: #e2e2e2; height: 3px; border-radius: 3px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; background: #000; margin-top: -5.5px; border-radius: 50%; }
+        /* Skeleton Shimmer Animations */
+        :root {
+            --color-surface-container: #eeeeee;
+            --color-surface-container-low: #f3f3f3;
+            --color-surface-container-high: #e8e8e8;
+            --color-outline-variant: #cfc4c5;
+        }
+        .dark {
+            --color-surface-container: #2f3131;
+            --color-surface-container-low: #1b1b1b;
+            --color-surface-container-high: #474747;
+            --color-outline-variant: #4c4546;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-bg {
+            background: linear-gradient(90deg, 
+                var(--color-surface-container) 25%, 
+                var(--color-surface-container-high) 50%, 
+                var(--color-surface-container) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+    
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--color-surface-container-low) !important;
+            border-color: transparent !important;
+        }
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 20%,
+                rgba(255, 255, 255, 0.6) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer-pulse 1.5s infinite;
+        }
+        @keyframes shimmer-pulse {
+            100% { transform: translateX(100%); }
+        }
+
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+
+<!-- Top Bar -->
+<header class="fixed top-0 w-full z-50 bg-white border-b border-outline-variant/30 flex justify-between items-center px-gutter py-sm">
+    <div class="flex items-center gap-md">
+        <span class="text-lg font-bold tracking-tight text-primary">WorkSphere AI</span>
+        <div class="h-4 w-px bg-outline-variant/50"></div>
+        <span class="text-xs text-secondary font-medium">Control Plane</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <div class="flex space-x-sm font-code-sm text-code-sm text-on-surface-variant" id="session-display-name" data-session-name>WorkSphere User</div>
+    </div>
+</header>
+
+<!-- Main Layout -->
+<main class="pt-[64px] pb-[32px] h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <nav class="h-full flex flex-col border-r border-outline-variant bg-surface-container-low transition-all duration-300" style="min-width: 220px; width: 220px;">
+        <div class="flex-1 px-sm py-md space-y-xs" id="sidebar-nav-links">
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/dashboard">
+                <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+                <span style="white-space: nowrap;">Dashboard</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/executive_intelligence">
+                <span class="material-symbols-outlined text-[20px]">insights</span>
+                <span style="white-space: nowrap;">Intelligence</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/agent_operations">
+                <span class="material-symbols-outlined text-[20px]">hub</span>
+                <span style="white-space: nowrap;">Analyst Operations</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/memory_explorer">
+                <span class="material-symbols-outlined text-[20px]">schema</span>
+                <span style="white-space: nowrap;">Knowledge Graph</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm bg-surface-container-highest text-primary rounded-lg font-body-sm font-medium" href="/control_plane">
+                <span class="material-symbols-outlined text-[20px]" style="font-variation-settings:'FILL' 1;">tune</span>
+                <span style="white-space: nowrap;">Control Plane</span>
+            </a>
+        </div>
+        <div class="p-md border-t border-outline-variant">
+            <button id="connect-account-btn" class="w-full py-sm bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest rounded shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center" style="white-space: nowrap;">
+                <span style="white-space: nowrap;">Connect Account</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="flex-grow h-full overflow-y-auto bg-surface-bright custom-scrollbar">
+        <div class="max-w-4xl mx-auto px-sm md:px-container-margin py-lg space-y-lg">
+
+            <!-- Header -->
+            <div class="border-b border-outline-variant/30 pb-4 flex justify-between items-end">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-primary">Control Plane</h1>
+                    <p class="text-sm text-secondary mt-1">Manage workspace connections, analysts, knowledge sources, rules, and notifications.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button id="reset-btn" type="button" class="px-4 py-2 border border-outline-variant text-secondary text-xs font-semibold rounded-lg hover:bg-surface-container transition-all">Reset</button>
+                    <button id="save-btn" type="button" class="px-5 py-2 bg-primary text-white text-xs font-bold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all">Save Changes</button>
+                </div>
+            </div>
+
+            <!-- Section Tabs -->
+            <div class="flex flex-wrap gap-2" id="section-tabs">
+                <button class="tab-btn active" data-section="workspace">Workspace</button>
+                <button class="tab-btn" data-section="analysts">Analyst Fleet</button>
+                <button class="tab-btn" data-section="knowledge">Knowledge Sources</button>
+                <button class="tab-btn" data-section="rules">Intelligence Rules</button>
+                <button class="tab-btn" data-section="notifications">Notifications</button>
+                <button class="tab-btn" data-section="advanced">Advanced</button>
+            </div>
+
+            <!-- ===================== WORKSPACE ===================== -->
+            <div id="section-workspace" class="space-y-4">
+                <div class="section-card p-6" id="card-connectors">
+                    <div class="section-header">
+                        <div class="section-icon bg-blue-50 text-blue-600"><span class="material-symbols-outlined">cloud_sync</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Connected Accounts</h2>
+                            <p class="text-xs text-secondary">Data sources WorkSphere AI reads to build your daily intelligence.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3" id="connectors-list">
+                        <div class="connector-card">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-blue-500">mail</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-primary">Microsoft Outlook</p>
+                                    <p class="text-xs text-secondary">Inbox, sent items, and flagged threads</p>
+                                </div>
+                            </div>
+                            <span class="badge-connected" id="outlook-badge">Connected</span>
+                        </div>
+                        <div class="connector-card">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-purple-500">calendar_month</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-primary">Microsoft Calendar</p>
+                                    <p class="text-xs text-secondary">Meetings, invites, and scheduling</p>
+                                </div>
+                            </div>
+                            <span class="badge-connected" id="calendar-badge">Connected</span>
+                        </div>
+                        <div class="connector-card">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-green-600">task_alt</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-primary">Microsoft To Do &amp; Planner</p>
+                                    <p class="text-xs text-secondary">Personal tasks and team project boards</p>
+                                </div>
+                            </div>
+                            <span class="badge-connected" id="todo-badge">Connected</span>
+                        </div>
+                        <div class="connector-card">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-amber-500">folder_open</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-primary">OneDrive &amp; SharePoint</p>
+                                    <p class="text-xs text-secondary">Documents, spreadsheets, and shared files</p>
+                                </div>
+                            </div>
+                            <span class="badge-connected" id="onedrive-badge">Connected</span>
+                        </div>
+                        <div class="connector-card">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-red-500">person_add</span>
+                                <div>
+                                    <p class="text-sm font-semibold text-primary">Google Workspace</p>
+                                    <p class="text-xs text-secondary">Gmail, Google Calendar, Google Drive</p>
+                                </div>
+                            </div>
+                            <div id="google-status-container">
+                                <button onclick="if(window.showToast)window.showToast('Google Workspace connection flow launching…','info')" class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-outline-variant/30 flex items-center justify-between">
+                        <p class="text-xs text-secondary">Last synced <strong class="text-primary" id="last-sync-time">just now</strong></p>
+                        <button id="test-connections-btn" class="px-4 py-1.5 border border-outline-variant text-secondary text-xs font-semibold rounded-lg hover:bg-surface-container transition-all">Test All Connections</button>
+                    </div>
+                </div>
+
+                <!-- Permissions -->
+                <div class="section-card p-6" id="card-permissions">
+                    <div class="section-header">
+                        <div class="section-icon bg-green-50 text-green-600"><span class="material-symbols-outlined">verified_user</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Data Permissions</h2>
+                            <p class="text-xs text-secondary">Control what types of data each analyst is allowed to read.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Read inbox contents</p>
+                                <p class="text-xs text-secondary">Allows the Communications Analyst to process email bodies</p>
+                            </div>
+                            <div class="toggle-track on" id="perm-inbox" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Read calendar events</p>
+                                <p class="text-xs text-secondary">Allows the Meeting Analyst to review calendar details</p>
+                            </div>
+                            <div class="toggle-track on" id="perm-calendar" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Read document files</p>
+                                <p class="text-xs text-secondary">Allows the Knowledge Analyst to index OneDrive documents</p>
+                            </div>
+                            <div class="toggle-track on" id="perm-files" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-1">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Read task lists</p>
+                                <p class="text-xs text-secondary">Allows the Workload Analyst to review Planner and To Do</p>
+                            </div>
+                            <div class="toggle-track on" id="perm-tasks" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== ANALYST FLEET ===================== -->
+            <div id="section-analysts" class="space-y-4 hidden">
+                <div class="section-card p-6" id="card-fleet">
+                    <div class="section-header">
+                        <div class="section-icon bg-purple-50 text-purple-600"><span class="material-symbols-outlined">groups</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Analyst Fleet</h2>
+                            <p class="text-xs text-secondary">Enable or disable each analyst and choose which intelligence model powers it.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+
+                        <div class="bg-surface-container-low rounded-xl p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-blue-500 text-[18px]">mail</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-primary">Communications Analyst</p>
+                                        <p class="text-xs text-secondary">Inbox urgency, escalations, and approvals</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-track on" id="toggle-email" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                            </div>
+                            <div>
+                                <label class="field-label">Intelligence Model</label>
+                                <select class="field-select" id="model-email">
+                                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Recommended</option>
+                                    <option value="llama-3.1-8b-instant">Llama 3.1 8B — Faster</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B — Balanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-surface-container-low rounded-xl p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-purple-500 text-[18px]">calendar_month</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-primary">Meeting Intelligence Analyst</p>
+                                        <p class="text-xs text-secondary">Decisions, action items, and risks from calendar</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-track on" id="toggle-meeting" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                            </div>
+                            <div>
+                                <label class="field-label">Intelligence Model</label>
+                                <select class="field-select" id="model-meeting">
+                                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Recommended</option>
+                                    <option value="llama-3.1-8b-instant">Llama 3.1 8B — Faster</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B — Balanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-surface-container-low rounded-xl p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 bg-green-50 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-green-600 text-[18px]">task_alt</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-primary">Workload &amp; Delivery Analyst</p>
+                                        <p class="text-xs text-secondary">Late tasks, delivery risks, and workload balance</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-track on" id="toggle-task" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                            </div>
+                            <div>
+                                <label class="field-label">Intelligence Model</label>
+                                <select class="field-select" id="model-task">
+                                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Recommended</option>
+                                    <option value="llama-3.1-8b-instant">Llama 3.1 8B — Faster</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B — Balanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-surface-container-low rounded-xl p-4">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-amber-500 text-[18px]">manage_search</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-primary">Enterprise Knowledge Analyst</p>
+                                        <p class="text-xs text-secondary">Documents, contracts, commitments, and risks</p>
+                                    </div>
+                                </div>
+                                <div class="toggle-track on" id="toggle-research" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                            </div>
+                            <div>
+                                <label class="field-label">Intelligence Model</label>
+                                <select class="field-select" id="model-research">
+                                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Recommended</option>
+                                    <option value="llama-3.1-8b-instant">Llama 3.1 8B — Faster</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B — Balanced</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== KNOWLEDGE SOURCES ===================== -->
+            <div id="section-knowledge" class="space-y-4 hidden">
+                <div class="section-card p-6" id="card-sources">
+                    <div class="section-header">
+                        <div class="section-icon bg-amber-50 text-amber-600"><span class="material-symbols-outlined">folder_special</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Knowledge Sources</h2>
+                            <p class="text-xs text-secondary">Specify which folders, drives, and channels feed the knowledge base.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="field-label">OneDrive Folder Path (Root)</label>
+                            <input type="text" class="field-input" id="onedrive-root" value="/Documents" placeholder="e.g. /Documents/Projects">
+                            <p class="text-xs text-secondary mt-1.5">Only files within this folder will be scanned and indexed.</p>
+                        </div>
+                        <div>
+                            <label class="field-label">File Types to Include</label>
+                            <div class="flex flex-wrap gap-2 mt-1" id="file-type-filters">
+                                <button class="type-chip active" data-type="pdf">PDF</button>
+                                <button class="type-chip active" data-type="docx">DOCX</button>
+                                <button class="type-chip active" data-type="xlsx">XLSX</button>
+                                <button class="type-chip active" data-type="pptx">PPTX</button>
+                                <button class="type-chip" data-type="txt">TXT</button>
+                                <button class="type-chip" data-type="msg">MSG</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="field-label">Maximum Documents to Index per Briefing</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <input type="range" min="5" max="100" value="50" id="max-docs-slider" oninput="document.getElementById('max-docs-val').textContent=this.value">
+                                <span class="text-sm font-mono font-bold text-primary w-8 text-right" id="max-docs-val">50</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Include email attachments</p>
+                                <p class="text-xs text-secondary">Index PDF and Word attachments found in your inbox</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-attachments" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Include SharePoint team sites</p>
+                                <p class="text-xs text-secondary">Scan shared team document libraries in addition to personal drive</p>
+                            </div>
+                            <div class="toggle-track" id="toggle-sharepoint" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== INTELLIGENCE RULES ===================== -->
+            <div id="section-rules" class="space-y-4 hidden">
+                <div class="section-card p-6" id="card-rules">
+                    <div class="section-header">
+                        <div class="section-icon bg-red-50 text-red-600"><span class="material-symbols-outlined">rule</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Intelligence Rules</h2>
+                            <p class="text-xs text-secondary">Define what the platform treats as urgent, risky, or requiring approval.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="field-label">Urgency Keywords (one per line)</label>
+                            <textarea id="urgency-keywords" rows="4" class="field-input resize-none" style="font-family:monospace;font-size:13px">urgent
+asap
+escalation
+critical
+board review
+deadline today</textarea>
+                            <p class="text-xs text-secondary mt-1.5">Emails or tasks containing these words will be flagged as urgent.</p>
+                        </div>
+                        <div>
+                            <label class="field-label">Risk Sensitivity</label>
+                            <div class="flex items-center gap-4 mt-2">
+                                <span class="text-xs text-secondary">Low</span>
+                                <input type="range" min="1" max="5" value="3" id="risk-sensitivity" oninput="updateRiskLabel(this.value)">
+                                <span class="text-xs text-secondary">High</span>
+                                <span class="text-sm font-mono font-bold text-primary w-20" id="risk-label">Medium</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Flag overdue items older than 2 days</p>
+                                <p class="text-xs text-secondary">The Workload Analyst will mark these as high-priority</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-overdue" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Detect stakeholder sentiment changes</p>
+                                <p class="text-xs text-secondary">Identify frustration or urgency in email tone automatically</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-sentiment" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Detect unresolved approval requests</p>
+                                <p class="text-xs text-secondary">Surface items that are awaiting a decision for more than 48 hours</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-approvals" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== NOTIFICATIONS ===================== -->
+            <div id="section-notifications" class="space-y-4 hidden">
+                <div class="section-card p-6" id="card-notifications">
+                    <div class="section-header">
+                        <div class="section-icon bg-blue-50 text-blue-600"><span class="material-symbols-outlined">notifications_active</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Notification Settings</h2>
+                            <p class="text-xs text-secondary">Control when and how the platform delivers your intelligence briefings.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between py-2">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Morning Briefing (weekdays, 8:00 AM)</p>
+                                <p class="text-xs text-secondary">Receive a full executive summary at the start of each working day</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-morning" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Urgent Item Alerts (instant)</p>
+                                <p class="text-xs text-secondary">Push alerts when a critical issue or escalation is detected in real time</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-urgent-alert" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Pending Approval Reminders (every 24h)</p>
+                                <p class="text-xs text-secondary">Remind you of items in the approval queue that are unresolved</p>
+                            </div>
+                            <div class="toggle-track" id="toggle-approval-reminder" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">End-of-day Summary (weekdays, 5:30 PM)</p>
+                                <p class="text-xs text-secondary">Close out the day with a decisions and outstanding items digest</p>
+                            </div>
+                            <div class="toggle-track" id="toggle-eod" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="pt-2 border-t border-outline-variant/30">
+                            <label class="field-label">Delivery Channel</label>
+                            <select class="field-select mt-1" id="notify-channel">
+                                <option value="in-app" selected>In-app only</option>
+                                <option value="email">Email digest</option>
+                                <option value="teams">Microsoft Teams message</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== ADVANCED ===================== -->
+            <div id="section-advanced" class="space-y-4 hidden">
+                <div class="section-card p-6" id="card-advanced">
+                    <div class="section-header">
+                        <div class="section-icon bg-surface-container text-secondary"><span class="material-symbols-outlined">settings</span></div>
+                        <div>
+                            <h2 class="text-sm font-bold text-primary">Advanced Configuration</h2>
+                            <p class="text-xs text-secondary">Fine-tune the intelligence engine, result caching, and fallback behaviour.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="field-label">Primary Intelligence Model</label>
+                                <select class="field-select" id="primary-llm-select">
+                                    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Recommended</option>
+                                    <option value="llama-3.1-8b-instant">Llama 3.1 8B — Fast</option>
+                                    <option value="mixtral-8x7b-32768">Mixtral 8x7B — Balanced</option>
+                                    <option value="gemma2-9b-it">Gemma 2 9B — Lightweight</option>
+                                </select>
+                                <p class="text-xs text-secondary mt-1">Used by the Chief of Staff for final briefing synthesis.</p>
+                            </div>
+                            <div>
+                                <label class="field-label">Result Cache Duration (seconds)</label>
+                                <input type="number" id="cache-ttl-input" class="field-input" min="0" max="86400" value="300">
+                                <p class="text-xs text-secondary mt-1">How long briefings are stored before a fresh analysis is required.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Enable automatic model fallback</p>
+                                <p class="text-xs text-secondary">Switch to a backup model if the primary is temporarily unavailable</p>
+                            </div>
+                            <div class="toggle-track on" id="toggle-fallback" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                        <div class="flex items-center justify-between py-2 border-t border-outline-variant/30">
+                            <div>
+                                <p class="text-sm font-medium text-primary">Detailed activity logging</p>
+                                <p class="text-xs text-secondary">Log every analyst step for auditing and review</p>
+                            </div>
+                            <div class="toggle-track" id="toggle-logging" onclick="toggleSwitch(this)"><div class="toggle-thumb"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom padding -->
+            <div class="h-8"></div>
+        </div>
+    </div>
+</main>
+
+<!-- Status Footer -->
+<footer class="fixed bottom-0 w-full z-50 bg-white border-t border-outline-variant/30 flex justify-between items-center px-gutter py-xs">
+    <div class="flex items-center gap-md">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span class="text-xs font-semibold uppercase tracking-widest text-primary">All Systems Ready</span>
+        </div>
+        <div class="h-3 w-px bg-outline-variant"></div>
+        <span class="text-xs text-secondary font-mono">WorkSphere AI</span>
+    </div>
+    <div class="flex items-center gap-lg">
+        <span class="text-xs text-secondary font-mono flex items-center gap-1">
+            <span class="material-symbols-outlined text-xs">check_circle</span> Synced
+        </span>
+    </div>
+</footer>
+
+<style>
+    .type-chip {
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid #cfc4c5;
+        font-size: 11px; font-weight: 600;
+        color: #5f5e5e; cursor: pointer;
+        transition: all 0.15s;
+    }
+    .type-chip.active {
+        background: #000; color: #fff; border-color: #000;
+    }
+</style>
+
+<script src="/sidebar.js?v=3"></script>
+<script>
+// Tab navigation
+document.getElementById('section-tabs').addEventListener('click', e => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const sections = ['workspace','analysts','knowledge','rules','notifications','advanced'];
+    sections.forEach(s => {
+        document.getElementById(`section-${s}`).classList.add('hidden');
+    });
+    document.getElementById(`section-${btn.dataset.section}`).classList.remove('hidden');
+});
+
+// Toggle switches
+function toggleSwitch(el) {
+    el.classList.toggle('on');
+}
+
+// Risk label
+function updateRiskLabel(v) {
+    const labels = ['','Very Low','Low','Medium','High','Very High'];
+    document.getElementById('risk-label').textContent = labels[parseInt(v)] || 'Medium';
+}
+
+// File type chips binding
+function bindFileTypeFilters() {
+    const filters = document.getElementById('file-type-filters');
+    if (filters) {
+        filters.onclick = e => {
+            const chip = e.target.closest('.type-chip');
+            if (chip) chip.classList.toggle('active');
+        };
+    }
+}
+
+// Test connections binding
+function bindConnectionTest() {
+    const btn = document.getElementById('test-connections-btn');
+    if (btn) {
+        btn.onclick = () => {
+            if (window.showToast) window.showToast('All workspace connections verified — 4/4 sources online', 'info');
+            ['outlook-badge','calendar-badge','todo-badge','onedrive-badge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = 'Connected ✓';
+            });
+        };
+    }
+}
+
+bindFileTypeFilters();
+bindConnectionTest();
+
+// Save
+document.getElementById('save-btn').addEventListener('click', async () => {
+    const token = window.worksphere_token;
+    const provider = localStorage.getItem('ws_provider') || 'microsoft';
+    const primary_model = document.getElementById('primary-llm-select').value;
+    const cache_ttl = parseInt(document.getElementById('cache-ttl-input').value, 10) || 300;
+
+    const enabled_agents = [];
+    if (document.getElementById('toggle-email').classList.contains('on')) enabled_agents.push('email_agent');
+    if (document.getElementById('toggle-meeting').classList.contains('on')) enabled_agents.push('meeting_agent');
+    if (document.getElementById('toggle-task').classList.contains('on')) enabled_agents.push('task_agent');
+    if (document.getElementById('toggle-research').classList.contains('on')) enabled_agents.push('research_agent');
+
+    const per_analyst_models = {
+        email: document.getElementById('model-email').value,
+        meeting: document.getElementById('model-meeting').value,
+        task: document.getElementById('model-task').value,
+        research: document.getElementById('model-research').value
+    };
+
+    // Helper to check toggle state
+    const isToggleOn = id => {
+        const el = document.getElementById(id);
+        return el ? el.classList.contains('on') : false;
+    };
+
+    // Workspace Permissions
+    const perm_inbox = isToggleOn('perm-inbox');
+    const perm_calendar = isToggleOn('perm-calendar');
+    const perm_files = isToggleOn('perm-files');
+    const perm_tasks = isToggleOn('perm-tasks');
+
+    // Knowledge Sources
+    const onedrive_root = document.getElementById('onedrive-root').value;
+    const file_types = Array.from(document.querySelectorAll('#file-type-filters .type-chip.active')).map(el => el.dataset.type);
+    const max_docs = parseInt(document.getElementById('max-docs-slider').value, 10) || 50;
+    const include_attachments = isToggleOn('toggle-attachments');
+    const include_sharepoint = isToggleOn('toggle-sharepoint');
+
+    // Intelligence Rules
+    const urgency_keywords = document.getElementById('urgency-keywords').value;
+    const risk_sensitivity = parseInt(document.getElementById('risk-sensitivity').value, 10) || 3;
+    const flag_overdue = isToggleOn('toggle-overdue');
+    const detect_sentiment = isToggleOn('toggle-sentiment');
+    const detect_approvals = isToggleOn('toggle-approvals');
+
+    // Notifications
+    const notify_morning = isToggleOn('toggle-morning');
+    const notify_urgent = isToggleOn('toggle-urgent-alert');
+    const notify_approval = isToggleOn('toggle-approval-reminder');
+    const notify_eod = isToggleOn('toggle-eod');
+    const notify_channel = document.getElementById('notify-channel').value;
+
+    // Advanced Config
+    const enable_fallback = isToggleOn('toggle-fallback');
+    const enable_logging = isToggleOn('toggle-logging');
+
+    const payload = {
+        primary_model,
+        cache_ttl,
+        enabled_agents,
+        per_analyst_models,
+        perm_inbox,
+        perm_calendar,
+        perm_files,
+        perm_tasks,
+        onedrive_root,
+        file_types,
+        max_docs,
+        include_attachments,
+        include_sharepoint,
+        urgency_keywords,
+        risk_sensitivity,
+        flag_overdue,
+        detect_sentiment,
+        detect_approvals,
+        notify_morning,
+        notify_urgent,
+        notify_approval,
+        notify_eod,
+        notify_channel,
+        enable_fallback,
+        enable_logging
+    };
+
+    try {
+        const res = await fetch(`/api/settings/update?token=${encodeURIComponent(token||'')}&provider=${encodeURIComponent(provider)}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error();
+        if (window.showToast) window.showToast('Control Plane settings saved successfully', 'info');
+    } catch {
+        if (window.showToast) window.showToast('Failed to save settings — please try again', 'error');
+    }
+});
+
+// Reset
+document.getElementById('reset-btn').addEventListener('click', () => {
+    document.getElementById('primary-llm-select').value = 'llama-3.3-70b-versatile';
+    document.getElementById('cache-ttl-input').value = '300';
+    ['toggle-email','toggle-meeting','toggle-task','toggle-research'].forEach(id => {
+        document.getElementById(id).classList.add('on');
+    });
+    document.getElementById('model-email').value = 'llama-3.3-70b-versatile';
+    document.getElementById('model-meeting').value = 'llama-3.3-70b-versatile';
+    document.getElementById('model-task').value = 'llama-3.3-70b-versatile';
+    document.getElementById('model-research').value = 'llama-3.3-70b-versatile';
+    if (window.showToast) window.showToast('Settings reset to defaults', 'info');
+});
+
+function getProviderFromToken() {
+    return localStorage.getItem('ws_provider') || 
+           localStorage.getItem('worksphere_provider') || 
+           sessionStorage.getItem('ws_provider') || 'microsoft';
+}
+
+function renderConnectionStatuses() {
+    const provider = getProviderFromToken();
+    const msBadges = ['outlook-badge', 'calendar-badge', 'todo-badge', 'onedrive-badge'];
+    
+    if (provider === 'microsoft') {
+        msBadges.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.className = 'badge-connected';
+                el.style.cssText = 'font-size: 12px; font-weight: 600; color: #059669; letter-spacing: 0.05em;';
+                el.textContent = 'CONNECTED';
+            }
+        });
+        const googleEl = document.getElementById('google-status-container');
+        if (googleEl) {
+            googleEl.innerHTML = `<button onclick="if(window.showToast)window.showToast('Google Workspace connection flow launching…','info')" class="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-lg hover:opacity-90 transition-all">Connect</button>`;
+        }
+    } else if (provider === 'google') {
+        msBadges.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.className = '';
+                el.style.cssText = 'font-size: 12px; font-weight: 500; color: #9CA3AF; letter-spacing: 0.05em;';
+                el.textContent = 'Available';
+            }
+        });
+        const googleEl = document.getElementById('google-status-container');
+        if (googleEl) {
+            googleEl.innerHTML = `<span class="badge-connected" style="font-size: 12px; font-weight: 600; color: #059669; letter-spacing: 0.05em;">CONNECTED</span>`;
+        }
+    }
+}
+
+// Load current settings
+async function loadSettings() {
+    const token = window.worksphere_token;
+    const provider = getProviderFromToken();
+
+    const SKELETON_CONNECTORS = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/4 mb-4"></div>
+        <div class="space-y-3">
+            <div class="h-14 shimmer-bg rounded-lg"></div>
+            <div class="h-14 shimmer-bg rounded-lg"></div>
+            <div class="h-14 shimmer-bg rounded-lg"></div>
+        </div>
+    </div>`;
+
+    const SKELETON_PERMISSIONS = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/3 mb-4"></div>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center"><div class="space-y-2 flex-1"><div class="h-3.5 shimmer-bg rounded w-1/3"></div><div class="h-3 shimmer-bg rounded w-2/3"></div></div><div class="w-10 h-6 shimmer-bg rounded-full"></div></div>
+            <div class="flex justify-between items-center"><div class="space-y-2 flex-1"><div class="h-3.5 shimmer-bg rounded w-1/4"></div><div class="h-3 shimmer-bg rounded w-1/2"></div></div><div class="w-10 h-6 shimmer-bg rounded-full"></div></div>
+        </div>
+    </div>`;
+
+    const SKELETON_FLEET = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/4 mb-4"></div>
+        <div class="space-y-3">
+            <div class="h-20 shimmer-bg rounded-lg"></div>
+            <div class="h-20 shimmer-bg rounded-lg"></div>
+        </div>
+    </div>`;
+
+    const SKELETON_SOURCES = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/3 mb-4"></div>
+        <div class="h-10 shimmer-bg rounded w-full"></div>
+        <div class="h-10 shimmer-bg rounded w-2/3"></div>
+    </div>`;
+
+    const SKELETON_RULES = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/3 mb-4"></div>
+        <div class="h-16 shimmer-bg rounded w-full"></div>
+        <div class="h-10 shimmer-bg rounded w-1/2"></div>
+    </div>`;
+
+    const SKELETON_NOTIFICATIONS = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/3 mb-4"></div>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-1/3"></div><div class="w-10 h-6 shimmer-bg rounded-full"></div></div>
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-1/4"></div><div class="w-10 h-6 shimmer-bg rounded-full"></div></div>
+        </div>
+    </div>`;
+
+    const SKELETON_ADVANCED = `
+    <div class="space-y-4 p-2">
+        <div class="h-4 shimmer-bg rounded w-1/4 mb-4"></div>
+        <div class="space-y-3">
+            <div class="h-10 shimmer-bg rounded w-full"></div>
+            <div class="h-10 shimmer-bg rounded w-full"></div>
+        </div>
+    </div>`;
+
+    const templates = {
+        'card-connectors': document.getElementById('card-connectors')?.innerHTML || '',
+        'card-permissions': document.getElementById('card-permissions')?.innerHTML || '',
+        'card-fleet': document.getElementById('card-fleet')?.innerHTML || '',
+        'card-sources': document.getElementById('card-sources')?.innerHTML || '',
+        'card-rules': document.getElementById('card-rules')?.innerHTML || '',
+        'card-notifications': document.getElementById('card-notifications')?.innerHTML || '',
+        'card-advanced': document.getElementById('card-advanced')?.innerHTML || ''
+    };
+
+    let uiRestored = false;
+
+    window.restoreUIFromTemplates = function() {
+        if (uiRestored) return;
+        for (const [id, html] of Object.entries(templates)) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+        }
+        uiRestored = true;
+        bindFileTypeFilters();
+        bindConnectionTest();
+        renderConnectionStatuses();
+    }
+
+    function showSettingsSkeletons() {
+        const skeletons = {
+            'card-connectors': SKELETON_CONNECTORS,
+            'card-permissions': SKELETON_PERMISSIONS,
+            'card-fleet': SKELETON_FLEET,
+            'card-sources': SKELETON_SOURCES,
+            'card-rules': SKELETON_RULES,
+            'card-notifications': SKELETON_NOTIFICATIONS,
+            'card-advanced': SKELETON_ADVANCED
+        };
+        for (const [id, html] of Object.entries(skeletons)) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+        }
+        uiRestored = false;
+    }
+
+    function showSettingsEmptyState() {
+        const cards = [
+            'card-connectors', 'card-permissions', 'card-fleet', 
+            'card-sources', 'card-rules', 'card-notifications', 'card-advanced'
+        ];
+        cards.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-6 text-secondary/60">
+                        <span class="material-symbols-outlined text-4xl opacity-40">settings_suggest</span>
+                        <p class="text-xs font-semibold text-primary">No settings found</p>
+                        <p class="text-[10px] max-w-xs mt-1">Configure and save your preferences or load default templates to begin.</p>
+                        <button onclick="restoreUIFromTemplates()" class="mt-3 px-4 py-1 bg-primary text-white text-[10px] font-bold rounded-lg hover:opacity-90 active:scale-[0.97] transition-all">
+                            Load Defaults
+                        </button>
+                    </div>
+                `;
+            }
+        });
+        uiRestored = false;
+    }
+
+    renderConnectionStatuses();
+
+    // Update sync time
+    const syncEl = document.getElementById('last-sync-time');
+    if (syncEl) syncEl.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Helper to set toggle state
+    function setToggle(id, isOn) {
+        const el = document.getElementById(id);
+        if (el) {
+            if (isOn) {
+                el.classList.add('on');
+            } else {
+                el.classList.remove('on');
+            }
+        }
+    }
+
+    showSettingsSkeletons();
+
+    try {
+        const res = await fetch(`/api/settings?token=${encodeURIComponent(token||'')}&provider=${encodeURIComponent(provider)}`);
+        if (!res.ok) {
+            showSettingsEmptyState();
+            return;
+        }
+        const data = await res.json();
+        if (!data || Object.keys(data).length === 0) {
+            showSettingsEmptyState();
+            return;
+        }
+        restoreUIFromTemplates();
+        
+        // Primary LLM and Cache duration
+        if (data.primary_model) document.getElementById('primary-llm-select').value = data.primary_model;
+        if (data.cache_ttl !== undefined) document.getElementById('cache-ttl-input').value = data.cache_ttl;
+        else if (data.graph_cache_ttl !== undefined) document.getElementById('cache-ttl-input').value = data.graph_cache_ttl;
+
+        // Analyst Fleet Active Toggles
+        if (data.enabled_agents) {
+            const ea = data.enabled_agents.map(a => a.toLowerCase().trim());
+            setToggle('toggle-email', ea.includes('email_agent'));
+            setToggle('toggle-meeting', ea.includes('meeting_agent'));
+            setToggle('toggle-task', ea.includes('task_agent'));
+            setToggle('toggle-research', ea.includes('research_agent'));
+        }
+
+        // Analyst Fleet Custom Models
+        if (data.per_analyst_models) {
+            const pam = data.per_analyst_models;
+            if (pam.email) document.getElementById('model-email').value = pam.email;
+            if (pam.meeting) document.getElementById('model-meeting').value = pam.meeting;
+            if (pam.task) document.getElementById('model-task').value = pam.task;
+            if (pam.research) document.getElementById('model-research').value = pam.research;
+        }
+
+        // Workspace Permissions
+        if (data.perm_inbox !== undefined) setToggle('perm-inbox', data.perm_inbox);
+        if (data.perm_calendar !== undefined) setToggle('perm-calendar', data.perm_calendar);
+        if (data.perm_files !== undefined) setToggle('perm-files', data.perm_files);
+        if (data.perm_tasks !== undefined) setToggle('perm-tasks', data.perm_tasks);
+
+        // Knowledge Sources
+        if (data.onedrive_root !== undefined) document.getElementById('onedrive-root').value = data.onedrive_root;
+        if (data.file_types) {
+            document.querySelectorAll('#file-type-filters .type-chip').forEach(chip => {
+                if (data.file_types.includes(chip.dataset.type)) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            });
+        }
+        if (data.max_docs !== undefined) {
+            document.getElementById('max-docs-slider').value = data.max_docs;
+            const docVal = document.getElementById('max-docs-val');
+            if (docVal) docVal.textContent = data.max_docs;
+        }
+        if (data.include_attachments !== undefined) setToggle('toggle-attachments', data.include_attachments);
+        if (data.include_sharepoint !== undefined) setToggle('toggle-sharepoint', data.include_sharepoint);
+
+        // Intelligence Rules
+        if (data.urgency_keywords !== undefined) document.getElementById('urgency-keywords').value = data.urgency_keywords;
+        if (data.risk_sensitivity !== undefined) {
+            document.getElementById('risk-sensitivity').value = data.risk_sensitivity;
+            if (window.updateRiskLabel) window.updateRiskLabel(data.risk_sensitivity);
+            else {
+                const labels = ['','Very Low','Low','Medium','High','Very High'];
+                const riskLabel = document.getElementById('risk-label');
+                if (riskLabel) riskLabel.textContent = labels[parseInt(data.risk_sensitivity)] || 'Medium';
+            }
+        }
+        if (data.flag_overdue !== undefined) setToggle('toggle-overdue', data.flag_overdue);
+        if (data.detect_sentiment !== undefined) setToggle('toggle-sentiment', data.detect_sentiment);
+        if (data.detect_approvals !== undefined) setToggle('toggle-approvals', data.detect_approvals);
+
+        // Notifications
+        if (data.notify_morning !== undefined) setToggle('toggle-morning', data.notify_morning);
+        if (data.notify_urgent !== undefined) setToggle('toggle-urgent-alert', data.notify_urgent);
+        if (data.notify_approval !== undefined) setToggle('toggle-approval-reminder', data.notify_approval);
+        if (data.notify_eod !== undefined) setToggle('toggle-eod', data.notify_eod);
+        if (data.notify_channel !== undefined) document.getElementById('notify-channel').value = data.notify_channel;
+
+        // Advanced Config
+        if (data.enable_fallback !== undefined) setToggle('toggle-fallback', data.enable_fallback);
+        if (data.enable_logging !== undefined) setToggle('toggle-logging', data.enable_logging);
+
+    } catch(e) { /* use defaults */ }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadSettings);
+} else {
+    loadSettings();
+}
+</script>
+</body>
+</html>

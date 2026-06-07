@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Executive Intelligence Center | WorkSphere AI</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+            font-family: 'Inter', sans-serif;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        :root {
+            --color-text-primary: #1a1c1c;
+        }
+        .executive-summary-content h1, .executive-summary-content h2, .executive-summary-content h3 {
+            font-size: 15px; font-weight: 600; margin: 12px 0 6px; color: var(--color-text-primary);
+        }
+        .executive-summary-content p { margin: 0 0 10px; line-height: 1.6; color: var(--color-text-primary); }
+        .executive-summary-content ul, .executive-summary-content ol { margin: 0 0 10px; padding-left: 20px; }
+        /* Skeleton Shimmer Animations */
+        :root {
+            --color-surface-container: #eeeeee;
+            --color-surface-container-low: #f3f3f3;
+            --color-surface-container-high: #e8e8e8;
+            --color-outline-variant: #cfc4c5;
+        }
+        .dark {
+            --color-surface-container: #2f3131;
+            --color-surface-container-low: #1b1b1b;
+            --color-surface-container-high: #474747;
+            --color-outline-variant: #4c4546;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-bg {
+            background: linear-gradient(90deg, 
+                var(--color-surface-container) 25%, 
+                var(--color-surface-container-high) 50%, 
+                var(--color-surface-container) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background-color: var(--color-surface-container-low) !important;
+            border-color: transparent !important;
+        }
+        .skeleton::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 20%,
+                rgba(255, 255, 255, 0.6) 60%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer-pulse 1.5s infinite;
+        }
+        @keyframes shimmer-pulse {
+            100% { transform: translateX(100%); }
+        }
+    </style>
+    <script id="tailwind-config">
+        tailwind.config = {
+          theme: {
+            extend: {
+              "colors": {
+                "secondary": "#5f5e5e",
+                "surface-container": "#eeeeee",
+                "inverse-surface": "#2f3131",
+                "inverse-on-surface": "#f1f1f1",
+                "on-background": "#1a1c1c",
+                "on-error": "#ffffff",
+                "surface-tint": "#5e5e5e",
+                "on-primary-fixed": "#1b1b1b",
+                "background": "#f9f9f9",
+                "on-secondary-container": "#636262",
+                "on-tertiary": "#ffffff",
+                "secondary-fixed": "#e5e2e1",
+                "tertiary": "#000000",
+                "secondary-container": "#e2dfdf",
+                "on-primary-container": "#848484",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-highest": "#e2e2e2",
+                "on-secondary-fixed": "#1c1b1c",
+                "primary-fixed-dim": "#c6c6c6",
+                "outline-variant": "#cfc4c5",
+                "error": "#ba1a1a",
+                "tertiary-fixed": "#d6e3ff",
+                "on-primary-fixed-variant": "#474747",
+                "tertiary-container": "#001b3d",
+                "primary-fixed": "#e2e2e2",
+                "tertiary-fixed-dim": "#b1c7f2",
+                "system-error": "#ba1a1a",
+                "on-tertiary-fixed-variant": "#31476b",
+                "on-error-container": "#93000a",
+                "on-surface-variant": "#4c4546",
+                "accent-blur-tertiary": "#d6e3ff",
+                "surface-bright": "#f9f9f9",
+                "surface-container-low": "#f3f3f3",
+                "on-secondary-fixed-variant": "#474647",
+                "on-secondary": "#ffffff",
+                "surface-variant": "#e2e2e2",
+                "on-surface": "#1a1c1c",
+                "surface": "#f9f9f9",
+                "on-tertiary-container": "#6f84ac",
+                "surface-dim": "#dadada",
+                "accent-blur-primary": "#d2e4ff",
+                "on-primary": "#ffffff",
+                "on-tertiary-fixed": "#001b3d",
+                "outline": "#7e7576",
+                "error-container": "#ffdad6",
+                "secondary-fixed-dim": "#c8c6c6",
+                "primary": "#000000",
+                "inverse-primary": "#c6c6c6",
+                "primary-container": "#1b1b1b",
+                "surface-container-high": "#e8e8e8"
+              },
+              "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+              },
+              "spacing": {
+                "md": "16px",
+                "unit": "4px",
+                "lg": "24px",
+                "xs": "4px",
+                "sm": "8px",
+                "container-margin": "32px",
+                "xl": "48px",
+                "gutter": "16px"
+              },
+              "fontFamily": {
+                "headline-lg": ["Inter"],
+                "body-md": ["Inter"],
+                "body-sm": ["Inter"],
+                "code-sm": ["JetBrains Mono"],
+                "display-lg": ["Inter"],
+                "label-md": ["Inter"],
+                "headline-xl": ["Inter"]
+              },
+              "fontSize": {
+                "headline-lg": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                "code-sm": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                "label-md": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                "headline-xl": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant flex justify-between items-center px-gutter py-sm">
+    <div class="flex items-center gap-md">
+        <span class="font-headline-lg text-lg font-bold tracking-tight text-primary">WorkSphere AI</span>
+    </div>
+    <div class="flex items-center gap-3">
+        <div class="flex space-x-sm font-code-sm text-code-sm text-on-surface-variant" id="session-display-name" data-session-name>WorkSphere User</div>
+    </div>
+</header>
+
+<!-- Main Workspace -->
+<main class="pt-[64px] pb-[32px] h-screen w-full flex overflow-hidden">
+    <!-- Left Sidebar: Main Navigation -->
+    <nav class="h-full flex flex-col border-r border-outline-variant bg-surface-container-low transition-all duration-300" style="min-width: 220px; width: 220px;">
+        <div class="flex-1 px-sm py-md space-y-xs" id="sidebar-nav-links">
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/dashboard">
+                <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+                <span style="white-space: nowrap;">Dashboard</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm bg-surface-container-highest text-primary rounded-lg font-body-sm font-medium" href="/executive_intelligence">
+                <span class="material-symbols-outlined text-[20px]">insights</span>
+                <span style="white-space: nowrap;">Intelligence</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/agent_operations">
+                <span class="material-symbols-outlined text-[20px]">hub</span>
+                <span style="white-space: nowrap;">Analyst Operations</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/memory_explorer">
+                <span class="material-symbols-outlined text-[20px]">schema</span>
+                <span style="white-space: nowrap;">Knowledge Graph</span>
+            </a>
+            <a class="flex items-center justify-start space-x-md px-md py-sm text-on-surface-variant hover:bg-surface-container transition-colors rounded-lg font-body-sm" href="/control_plane">
+                <span class="material-symbols-outlined text-[20px]">tune</span>
+                <span style="white-space: nowrap;">Control Plane</span>
+            </a>
+        </div>
+        <div class="p-md border-t border-outline-variant">
+            <button id="add-instance-btn" class="w-full py-sm bg-primary text-on-primary font-label-md text-label-md uppercase tracking-widest rounded shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center" style="white-space: nowrap;">
+                <span style="white-space: nowrap;">Connect Account</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Central Workspace: Intelligence widgets -->
+    <div class="flex-grow h-full overflow-y-auto px-sm md:px-lg py-sm md:py-lg bg-surface-bright custom-scrollbar">
+        <div class="max-w-6xl mx-auto space-y-lg">
+            <!-- Header -->
+            <div class="border-b border-outline-variant/30 pb-4">
+                <h1 class="text-3xl font-extrabold text-primary">Executive Intelligence Center</h1>
+                <p class="text-sm text-secondary mt-1">Consolidated organizational intelligence gathered across communications and schedules.</p>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Column 1 & 2: Executive Summary & Decisions -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Executive Summary Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b border-outline-variant/30 pb-3">
+                            <h2 class="text-base font-bold text-primary flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">article</span>
+                                <span>Executive Summary</span>
+                            </h2>
+                            <span class="text-xs text-secondary/70 font-mono" id="summary-compiled-time">Last Compiled: Today</span>
+                        </div>
+                        <div class="text-sm leading-relaxed text-secondary space-y-3 executive-summary-content" id="executive-summary-content">
+                            <p>Loading latest organizational briefing summary...</p>
+                        </div>
+                    </div>
+
+                    <!-- Decision Tracker Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4" data-source="structured">
+                        <div class="flex justify-between items-center border-b border-outline-variant/30 pb-3">
+                            <h2 class="text-base font-bold text-primary flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">gavel</span>
+                                <span>Decision Tracker</span>
+                            </h2>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-surface-container-low border-b border-outline-variant/30">
+                                        <th class="p-3 font-semibold text-secondary uppercase tracking-wider">Date</th>
+                                        <th class="p-3 font-semibold text-secondary uppercase tracking-wider">Decision Context</th>
+                                        <th class="p-3 font-semibold text-secondary uppercase tracking-wider">Source</th>
+                                        <th class="p-3 font-semibold text-secondary uppercase tracking-wider text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-outline-variant/10" id="decision-tracker-rows">
+                                    <tr id="decision-empty-row">
+                                        <td colspan="4" class="p-6 text-center text-xs text-secondary/60 italic">No decisions recorded yet. Run a briefing to populate this table.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Column 3: Approvals, Risks, Sentiment, and Deadlines -->
+                <div class="space-y-6">
+                    <!-- Approval Queue Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4" data-source="structured">
+                        <h2 class="text-sm font-bold text-primary border-b border-outline-variant/30 pb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">fact_check</span>
+                            <span>Approval Queue</span>
+                        </h2>
+                        <div class="space-y-3" id="approval-queue-list">
+                            <p class="text-xs text-secondary/60 italic py-2 text-center" id="approval-empty">No pending approvals.</p>
+                        </div>
+                        <!-- Resolved Queue section -->
+                        <div class="mt-4 border-t border-outline-variant/30 pt-3 hidden" id="resolved-approvals-section">
+                            <h3 class="text-xs font-bold text-secondary flex items-center gap-2 mb-2">
+                                <span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+                                <span>Resolved Approvals</span>
+                            </h3>
+                            <div class="space-y-2" id="resolved-approvals-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Radar Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4" data-source="structured">
+                        <h2 class="text-sm font-bold text-primary border-b border-outline-variant/30 pb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">radar</span>
+                            <span>Risk Radar</span>
+                        </h2>
+                        <div class="space-y-3" id="risk-radar-list">
+                            <p class="text-xs text-secondary/60 italic py-2 text-center" id="risk-empty">No active risks detected.</p>
+                        </div>
+                    </div>
+
+                    <!-- Stakeholder Sentiment Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4" data-source="structured">
+                        <h2 class="text-sm font-bold text-primary border-b border-outline-variant/30 pb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">sentiment_satisfied</span>
+                            <span>Stakeholder Sentiment</span>
+                        </h2>
+                        <div class="space-y-3" id="sentiment-list">
+                            <p class="text-xs text-secondary/60 italic py-2 text-center" id="sentiment-empty">No stakeholder concerns identified.</p>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Deadlines Widget -->
+                    <div class="bg-white rounded-xl border border-outline-variant/60 shadow-sm p-6 space-y-4" data-source="structured">
+                        <h2 class="text-sm font-bold text-primary border-b border-outline-variant/30 pb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">event_busy</span>
+                            <span>Upcoming Deadlines</span>
+                        </h2>
+                        <div class="space-y-3" id="deadlines-list">
+                            <p class="text-xs text-secondary/60 italic py-2 text-center" id="deadlines-empty">No upcoming deadlines.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="/sidebar.js?v=3"></script>
+<script>
+    // ===== Shared action handlers =====
+    async function createActionItem(context, btn) {
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'SYNCING...';
+        }
+        try {
+            const token = window.worksphere_token;
+            const provider = localStorage.getItem('ws_provider') || 'microsoft';
+            const res = await fetch(`/api/actions/create-todo?token=${encodeURIComponent(token||'')}&provider=${encodeURIComponent(provider)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: context })
+            });
+            if (res.ok) {
+                if (window.showToast) window.showToast(`Action task '${context}' successfully synced to Microsoft To Do`, 'info');
+                if (btn) {
+                    btn.textContent = 'Created ✓';
+                    btn.disabled = true;
+                    btn.className = 'px-3 py-1 bg-green-100 text-green-800 rounded border border-green-200 text-[10px] font-bold cursor-not-allowed';
+                    
+                    // Add a green check badge next to the decision row
+                    const tdText = btn.closest('tr').querySelector('.decision-text-cell');
+                    if (tdText) {
+                        const badge = document.createElement('span');
+                        badge.className = 'inline-flex items-center ml-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800';
+                        badge.innerHTML = `<span class="material-symbols-outlined text-[12px] mr-0.5">check_circle</span>Synced`;
+                        tdText.appendChild(badge);
+                    }
+                }
+            } else {
+                throw new Error("Failed to sync");
+            }
+        } catch (e) {
+            console.error(e);
+            if (window.showToast) window.showToast("Failed to sync task to Microsoft To Do", "error");
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = 'CREATE ACTION';
+            }
+        }
+    }
+
+    function approveItem(name, btn) {
+        if (window.showToast) window.showToast(`Approved: "${name}" signed off successfully`, 'info');
+        resolveApproval(name, btn, 'APPROVED');
+    }
+
+    function rejectItem(name, btn) {
+        if (window.showToast) window.showToast(`Rejected: "${name}" sent back for revisions`, 'info');
+        resolveApproval(name, btn, 'REJECTED');
+    }
+
+    function resolveApproval(name, btn, status) {
+        const card = btn.closest('.p-3');
+        if (!card) return;
+        
+        // Remove active buttons
+        const actionDiv = card.querySelector('.flex.gap-1');
+        if (actionDiv) actionDiv.remove();
+        
+        // Add timestamp and status label
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const badgeColor = status === 'APPROVED' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
+        
+        const statusEl = document.createElement('div');
+        statusEl.className = `flex items-center gap-2 mt-1`;
+        statusEl.innerHTML = `
+            <span class="px-1.5 py-0.5 text-[8px] font-bold border rounded uppercase ${badgeColor}">${status}</span>
+            <span class="text-[9px] text-secondary/50 font-mono">${timestamp}</span>
+        `;
+        card.querySelector('.text-xs').appendChild(statusEl);
+        
+        // Mute style
+        card.classList.remove('bg-surface-container-low');
+        card.classList.add('bg-neutral-50', 'opacity-60');
+        
+        // Move to resolved section
+        const resolvedSection = document.getElementById('resolved-approvals-section');
+        const resolvedList = document.getElementById('resolved-approvals-list');
+        if (resolvedSection && resolvedList) {
+            resolvedSection.classList.remove('hidden');
+            resolvedList.appendChild(card);
+        } else {
+            card.remove();
+        }
+        
+        checkApprovalsEmpty();
+    }
+
+    function checkApprovalsEmpty() {
+        const list = document.getElementById('approval-queue-list');
+        if (list && list.querySelectorAll('.p-3').length === 0) {
+            list.innerHTML = `<p class="text-xs text-secondary/60 italic py-2 text-center" id="approval-empty">No pending approvals.</p>`;
+        }
+    }
+
+    // ===== Today's formatted date =====
+    function todayLabel() {
+        return new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // ===== P4: Decision Tracker =====
+    function populateDecisionTracker(payload) {
+        const tbody = document.getElementById('decision-tracker-rows');
+        if (!tbody) return;
+        const decisions = payload?.decisions || [];
+        if (!decisions.length) {
+            tbody.innerHTML = `<tr id="decision-empty-row"><td colspan="4" class="p-6 text-center text-xs text-secondary/60 italic">No decisions recorded yet. Run a briefing to populate this table.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = '';
+        const today = todayLabel();
+        decisions.forEach(decision => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-surface-container-low/40 transition-colors';
+            
+            let date = today;
+            let text = "";
+            let source = "Intelligence Briefing";
+            
+            if (typeof decision === 'object' && decision !== null) {
+                text = decision.decision || decision.text || "";
+                date = decision.date || today;
+                source = decision.source || "Intelligence Briefing";
+            } else {
+                text = String(decision);
+            }
+            
+            const safeDecision = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeCtx = safeDecision.substring(0, 60).replace(/"/g, '&quot;');
+            tr.innerHTML = `
+                <td class="p-3 font-mono text-secondary whitespace-nowrap">${date}</td>
+                <td class="p-3 font-medium text-primary decision-text-cell">${safeDecision}</td>
+                <td class="p-3 text-secondary">${source}</td>
+                <td class="p-3 text-right">
+                    <button onclick="createActionItem('${safeCtx}', this)" class="px-3 py-1 bg-surface-container hover:bg-surface-container-highest rounded border border-outline-variant text-[10px] font-bold text-primary transition-all">CREATE ACTION</button>
+                </td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ===== P5a: Risk Radar =====
+    function populateRiskRadar(payload) {
+        const container = document.getElementById('risk-radar-list');
+        if (!container) return;
+        const risks = payload?.risks || [];
+        if (!risks.length) {
+            container.innerHTML = `<p class="text-xs text-secondary/60 italic py-2 text-center" id="risk-empty">No active risks detected.</p>`;
+            return;
+        }
+        container.innerHTML = '';
+        risks.forEach(risk => {
+            let text = "";
+            let level = "MEDIUM";
+            
+            if (typeof risk === 'object' && risk !== null) {
+                text = risk.risk || risk.text || risk.description || "";
+                level = (risk.severity || risk.level || risk.priority || "MEDIUM").toUpperCase();
+            } else {
+                text = String(risk);
+                const lowerText = text.toLowerCase();
+                if (/critical|blocker|immediate|urgent|escalat/.test(lowerText)) {
+                    level = "CRITICAL";
+                } else if (/high/.test(lowerText)) {
+                    level = "HIGH";
+                }
+            }
+            
+            let badgeClass = "bg-amber-100 text-amber-800";
+            let bgClass = "bg-amber-50/50 border-amber-100";
+            let textClass = "text-amber-900";
+            
+            if (level === "CRITICAL") {
+                badgeClass = "bg-red-100 text-red-800";
+                bgClass = "bg-red-50/50 border-red-100";
+                textClass = "text-red-900";
+            } else if (level === "HIGH") {
+                badgeClass = "bg-orange-100 text-orange-800";
+                bgClass = "bg-orange-50/50 border-orange-100";
+                textClass = "text-orange-900";
+            }
+            
+            const badge = `<span class="px-2 py-0.5 ${badgeClass} text-[9px] font-bold rounded uppercase">${level}</span>`;
+            const card = document.createElement('div');
+            card.className = `p-3 rounded-lg ${bgClass} border flex items-start gap-3`;
+            card.innerHTML = `${badge}<p class="text-xs ${textClass} flex-1">${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</p>`;
+            container.appendChild(card);
+        });
+    }
+
+    // ===== P5b: Stakeholder Sentiment =====
+    function populateStakeholders(payload) {
+        const container = document.getElementById('sentiment-list');
+        if (!container) return;
+        const concerns = payload?.stakeholder_sentiment || [];
+        if (!concerns.length) {
+            container.innerHTML = `<p class="text-xs text-secondary/60 italic py-2 text-center" id="sentiment-empty">No stakeholder concerns identified.</p>`;
+            return;
+        }
+        container.innerHTML = '';
+        concerns.forEach(concern => {
+            let name = "Stakeholder";
+            let sentiment = "MONITORING";
+            let signalText = "";
+            
+            if (typeof concern === 'object' && concern !== null) {
+                name = concern.name || concern.stakeholder || "Stakeholder";
+                sentiment = (concern.sentiment || concern.label || "MONITORING").toUpperCase();
+                signalText = concern.signal || concern.text || concern.concern || "";
+            } else {
+                signalText = String(concern);
+                const nameMatch = signalText.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/);
+                name = nameMatch ? nameMatch[1] : 'Stakeholder';
+                
+                const lowerText = signalText.toLowerCase();
+                if (/anxious|concern|worried|block|fail|escalat/.test(lowerText)) {
+                    sentiment = "CONCERNED";
+                } else if (/happy|glad|good|success|great/.test(lowerText)) {
+                    sentiment = "POSITIVE";
+                }
+            }
+            
+            let badgeStyle = "background-color: #f3f4f6; color: #4b5563;";
+            if (sentiment === "CONCERNED" || sentiment === "NEGATIVE" || sentiment === "ANXIOUS") {
+                badgeStyle = "background-color: #fee2e2; color: #991b1b;";
+            } else if (sentiment === "POSITIVE") {
+                badgeStyle = "background-color: #dcfce7; color: #166534;";
+            }
+            
+            const row = document.createElement('div');
+            row.className = 'p-3 bg-surface-container-low rounded-lg border border-outline-variant/40 space-y-1';
+            row.innerHTML = `
+                <div class="flex justify-between items-center text-xs">
+                    <span class="text-primary font-semibold truncate pr-2">${name.replace(/</g,'&lt;')}</span>
+                    <span class="px-2 py-0.5 rounded-full font-bold text-[9px] whitespace-nowrap" style="${badgeStyle}">${sentiment}</span>
+                </div>
+                <p class="text-[11px] text-secondary/80 leading-normal">${signalText.replace(/</g,'&lt;')}</p>`;
+            container.appendChild(row);
+        });
+    }
+
+    // ===== P5c: Approval Queue =====
+    function populateApprovals(payload) {
+        const container = document.getElementById('approval-queue-list');
+        if (!container) return;
+        const approvals = payload?.pending_approvals || [];
+        if (!approvals.length) {
+            container.innerHTML = `<p class="text-xs text-secondary/60 italic py-2 text-center" id="approval-empty">No pending approvals.</p>`;
+            return;
+        }
+        container.innerHTML = '';
+        approvals.forEach(approval => {
+            let text = "";
+            let requested_by = "";
+            let idle_hours = 0;
+            if (typeof approval === 'object' && approval !== null) {
+                text = approval.item || approval.title || "";
+                requested_by = approval.requested_by || "";
+                idle_hours = approval.idle_hours !== undefined ? approval.idle_hours : 0;
+            } else {
+                text = String(approval);
+            }
+            const safeText = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const safeName = text.substring(0, 40).replace(/"/g,'&quot;');
+            
+            let displayDetails = safeText;
+            if (requested_by) {
+                displayDetails += ` (Requested by: ${requested_by})`;
+            }
+            if (idle_hours > 0) {
+                displayDetails += ` - Idle: ${idle_hours}h`;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'p-3 bg-surface-container-low rounded-lg border border-outline-variant/40 flex justify-between items-center';
+            card.innerHTML = `
+                <div class="text-xs flex-1 pr-2">
+                    <p class="font-medium text-primary">${displayDetails}</p>
+                </div>
+                <div class="flex gap-1 shrink-0">
+                    <button onclick="approveItem('${safeName}', this)" class="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"><span class="material-symbols-outlined text-[18px]">check_circle</span></button>
+                    <button onclick="rejectItem('${safeName}', this)" class="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"><span class="material-symbols-outlined text-[18px]">cancel</span></button>
+                </div>`;
+            container.appendChild(card);
+        });
+    }
+
+    // ===== P13: Deadlines =====
+    function populateDeadlines(payload) {
+        const container = document.getElementById('deadlines-list');
+        if (!container) return;
+        const meetings = payload?.upcoming_meetings || [];
+        if (!meetings.length) {
+            container.innerHTML = `<p class="text-xs text-secondary/60 italic py-2 text-center" id="deadlines-empty">No upcoming deadlines.</p>`;
+            return;
+        }
+        container.innerHTML = '';
+        meetings.forEach((meeting, idx) => {
+            const isLast = idx === meetings.length - 1;
+            let title = "";
+            let timeStr = "";
+            
+            if (typeof meeting === 'object' && meeting !== null) {
+                title = meeting.title || meeting.subject || "";
+                timeStr = meeting.time || meeting.start || "";
+            } else {
+                title = String(meeting);
+            }
+            
+            let dateFormatted = "TODAY";
+            if (timeStr) {
+                try {
+                    const parsedDate = new Date(timeStr);
+                    if (!isNaN(parsedDate)) {
+                        dateFormatted = parsedDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+                    } else {
+                        dateFormatted = timeStr;
+                    }
+                } catch(e) {
+                    dateFormatted = timeStr;
+                }
+            }
+            
+            const row = document.createElement('div');
+            row.className = `flex justify-between items-center text-xs gap-3 ${isLast ? '' : 'border-b border-outline-variant/10 pb-1.5'}`;
+            row.innerHTML = `
+                <h4 class="font-medium text-primary flex-1 truncate" title="${title.replace(/"/g,'&quot;')}">${title.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</h4>
+                <span class="text-secondary font-bold font-mono text-[9px] uppercase shrink-0">${dateFormatted}</span>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    // ===== Bootstrap on DOMContentLoaded =====
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = window.worksphere_token;
+        const provider = localStorage.getItem('ws_provider') || 'microsoft';
+        const summaryContent = document.getElementById('executive-summary-content');
+        const summaryCompiled = document.getElementById('summary-compiled-time');
+
+        const SKELETON_TEXT = `
+        <div class="space-y-3 p-1">
+            <div class="h-4 shimmer-bg rounded w-full"></div>
+            <div class="h-4 shimmer-bg rounded w-11/12"></div>
+            <div class="h-4 shimmer-bg rounded w-3/4"></div>
+        </div>`;
+
+        const SKELETON_TABLE_ROW = `
+        <tr>
+            <td colspan="4" class="p-4">
+                <div class="space-y-3">
+                    <div class="h-4 shimmer-bg rounded w-full"></div>
+                    <div class="h-4 shimmer-bg rounded w-5/6"></div>
+                </div>
+            </td>
+        </tr>`;
+
+        const SKELETON_CARDS = `
+        <div class="space-y-2 p-1">
+            <div class="h-10 shimmer-bg rounded-lg w-full"></div>
+            <div class="h-10 shimmer-bg rounded-lg w-full"></div>
+        </div>`;
+
+        const SKELETON_LIST_ITEMS = `
+        <div class="space-y-2 p-1">
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-1/3"></div><div class="h-4 shimmer-bg rounded w-12 rounded-full"></div></div>
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-1/4"></div><div class="h-4 shimmer-bg rounded w-12 rounded-full"></div></div>
+        </div>`;
+
+        const SKELETON_DEADLINES = `
+        <div class="space-y-2 p-1">
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-1/2"></div><div class="h-3 shimmer-bg rounded w-10"></div></div>
+            <div class="flex justify-between items-center"><div class="h-3.5 shimmer-bg rounded w-2/3"></div><div class="h-3 shimmer-bg rounded w-10"></div></div>
+        </div>`;
+
+        function showExecutiveSkeletons() {
+            const summary = document.getElementById('executive-summary-content');
+            const decisions = document.getElementById('decision-tracker-rows');
+            const risks = document.getElementById('risk-radar-list');
+            const sentiment = document.getElementById('sentiment-list');
+            const approvals = document.getElementById('approval-queue-list');
+            const deadlines = document.getElementById('deadlines-list');
+
+            if (summary) summary.innerHTML = SKELETON_TEXT;
+            if (decisions) decisions.innerHTML = SKELETON_TABLE_ROW;
+            if (risks) risks.innerHTML = SKELETON_CARDS;
+            if (sentiment) sentiment.innerHTML = SKELETON_LIST_ITEMS;
+            if (approvals) approvals.innerHTML = SKELETON_CARDS;
+            if (deadlines) deadlines.innerHTML = SKELETON_DEADLINES;
+        }
+
+        function showExecutiveEmptyStates() {
+            const summary = document.getElementById('executive-summary-content');
+            const decisions = document.getElementById('decision-tracker-rows');
+            const risks = document.getElementById('risk-radar-list');
+            const sentiment = document.getElementById('sentiment-list');
+            const approvals = document.getElementById('approval-queue-list');
+            const deadlines = document.getElementById('deadlines-list');
+
+            if (summary) {
+                summary.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-6 text-secondary/60">
+                        <span class="material-symbols-outlined text-4xl opacity-40 mb-2">article</span>
+                        <p class="text-sm font-semibold text-primary">No briefing report compiled yet</p>
+                        <p class="text-xs mt-1">Please navigate to the Dashboard and click 'Update Briefing' to compile today's executive summaries.</p>
+                    </div>
+                `;
+            }
+            if (decisions) {
+                decisions.innerHTML = `
+                    <tr id="decision-empty-row">
+                        <td colspan="4" class="p-6 text-center">
+                            <div class="flex flex-col items-center justify-center text-secondary/60 space-y-1">
+                                <span class="material-symbols-outlined text-3xl opacity-40">gavel</span>
+                                <p class="text-xs font-semibold text-primary">No decisions recorded</p>
+                                <p class="text-[10px]">Decisions identified from upcoming calendar events will appear here.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            if (risks) {
+                risks.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-4 text-secondary/60 space-y-1">
+                        <span class="material-symbols-outlined text-3xl opacity-40">warning</span>
+                        <p class="text-xs font-semibold text-primary">No active risks detected</p>
+                        <p class="text-[10px]">Open delivery risks and escalation items will appear here.</p>
+                    </div>
+                `;
+            }
+            if (sentiment) {
+                sentiment.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-4 text-secondary/60 space-y-1">
+                        <span class="material-symbols-outlined text-3xl opacity-40">sentiment_neutral</span>
+                        <p class="text-xs font-semibold text-primary">No concerns identified</p>
+                        <p class="text-[10px]">Stakeholder sentiment and key issues will be listed here.</p>
+                    </div>
+                `;
+            }
+            if (approvals) {
+                approvals.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-4 text-secondary/60 space-y-1">
+                        <span class="material-symbols-outlined text-3xl opacity-40">pending_actions</span>
+                        <p class="text-xs font-semibold text-primary">No pending approvals</p>
+                        <p class="text-[10px]">Pending workflows and sign-offs will appear here.</p>
+                    </div>
+                `;
+            }
+            if (deadlines) {
+                deadlines.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center p-4 text-secondary/60 space-y-1">
+                        <span class="material-symbols-outlined text-3xl opacity-40">event_busy</span>
+                        <p class="text-xs font-semibold text-primary">No upcoming deadlines</p>
+                        <p class="text-[10px]">Upcoming tasks and critical timelines will appear here.</p>
+                    </div>
+                `;
+            }
+        }
+
+        showExecutiveSkeletons();
+
+        // 1. Fetch Latest Briefing Report for summary content
+        fetch(`/api/intelligence/latest?token=${encodeURIComponent(token)}&provider=${encodeURIComponent(provider)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.report) {
+                    const reportText = data.report;
+                    const summaryMatch = reportText.match(/1\.\s+Executive\s+Summary([\s\S]*?)(?=2\.\s+Urgent)/i) ||
+                                         reportText.match(/Executive\s+Summary([\s\S]*?)(?=(Urgent|Situation))/i);
+                    const briefingData = data;
+                    const rawText = briefingData.executive_summary || briefingData.summary || (summaryMatch && summaryMatch[1] ? summaryMatch[1].trim() : '') || reportText.split('\n\n').slice(0, 3).join('\n\n');
+                    summaryContent.innerHTML = marked.parse(rawText);
+                    if (summaryCompiled && data.timestamp) {
+                        const dateStr = new Date(data.timestamp * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        summaryCompiled.textContent = `Last Compiled: Today ${dateStr}`;
+                    }
+                } else {
+                    showExecutiveEmptyStates();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showExecutiveEmptyStates();
+                if (summaryContent) {
+                    summaryContent.innerHTML = `<p class="text-red-600 italic">Could not retrieve the latest briefing.</p>`;
+                }
+            });
+
+        // 2. Fetch Structured Briefing Data to populate widgets dynamically
+        fetch(`/api/intelligence/structured?token=${encodeURIComponent(token)}&provider=${encodeURIComponent(provider)}`)
+            .then(res => res.json())
+            .then(payload => {
+                if (payload && payload.status !== 'empty') {
+                    populateDecisionTracker(payload);
+                    populateRiskRadar(payload);
+                    populateStakeholders(payload);
+                    populateApprovals(payload);
+                    populateDeadlines(payload);
+                } else {
+                    populateDecisionTracker(null);
+                    populateRiskRadar(null);
+                    populateStakeholders(null);
+                    populateApprovals(null);
+                    populateDeadlines(null);
+                }
+            })
+            .catch(err => {
+                console.error("Error loading structured payload:", err);
+                populateDecisionTracker(null);
+                populateRiskRadar(null);
+                populateStakeholders(null);
+                populateApprovals(null);
+                populateDeadlines(null);
+            });
+    });
+</script>
+</body>
+</html>

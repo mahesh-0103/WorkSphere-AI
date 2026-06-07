@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | WorkSphere AI</title>
+    <style>
+        :root {
+            --bg: #F8F9FA;
+            --surface: #FFFFFF;
+            --border: #E5E7EB;
+            --text-primary: #111827;
+            --text-secondary: #6B7280;
+            --text-muted: #9CA3AF;
+            --accent: #2563EB;
+            --accent-light: #EFF6FF;
+            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            background-color: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* SECTION 1 — TOP NAV BAR */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-btn {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 18px;
+            background-color: var(--surface);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            outline: none;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--bg);
+            border-color: var(--text-muted);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Scroll Reveal base style */
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* SECTION 2 — HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg);
+            padding: 110px 24px 80px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 640px;
+            margin: 0 auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 9999px;
+            border: 1px solid #DBEAFE;
+            background-color: var(--accent-light);
+            color: var(--accent);
+            font-size: 12px;
+            padding: 4px 12px;
+            letter-spacing: 0.04em;
+            font-weight: 500;
+        }
+
+        .hero-heading {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.15;
+            margin-top: 16px;
+            letter-spacing: -0.025em;
+        }
+
+        .hero-subheading {
+            font-size: 18px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            max-width: 520px;
+            margin: 16px auto 0;
+        }
+
+        .cta-btn {
+            width: 100%;
+            max-width: 320px;
+            height: 48px;
+            background-color: var(--accent);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 32px auto 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            outline: none;
+        }
+
+        .cta-btn:hover {
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+        }
+
+        .cta-btn:active {
+            transform: translateY(0);
+        }
+
+        .cta-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        .stat-pills {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-pill {
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background-color: var(--surface);
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        /* SECTION 3 — HOW IT WORKS */
+        .how-it-works {
+            padding: 100px 24px;
+            background-color: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .section-heading {
+            font-size: 32px;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 8px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            max-width: 960px;
+            margin: 48px auto 0;
+        }
+
+        .step-card {
+            padding: 32px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background-color: var(--surface);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .step-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+            border-color: var(--accent);
+        }
+
+        .step-num {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .step-icon {
+            font-size: 28px;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* SECTION 4 — WHAT IT READS */
+        .what-it-reads {
+            padding: 100px 24px;
+            background-color: var(--bg);
+        }
+
+        .reads-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            max-width: 700px;
+            margin: 48px auto 0;
+        }
+
+        .read-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .read-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.02);
+        }
+
+        .read-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .read-icon.blue { background-color: #EFF6FF; color: #2563EB; }
+        .read-icon.green { background-color: #ECFDF5; color: #10B981; }
+        .read-icon.amber { background-color: #FFFBEB; color: #F59E0B; }
+        .read-icon.purple { background-color: #F5F3FF; color: #8B5CF6; }
+
+        .read-content h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .read-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+
+        /* SECTION 5 — FINAL CTA */
+        .final-cta {
+            padding: 100px 24px;
+            background-color: #111827;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .final-cta h2 {
+            font-size: 36px;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: -0.02em;
+        }
+
+        .final-cta p {
+            font-size: 16px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            margin-bottom: 36px;
+        }
+
+        .final-cta .cta-btn {
+            background-color: #FFFFFF;
+            color: #111827;
+            margin: 0 auto;
+            box-shadow: 0 4px 12px rgba(255,255,255,0.05);
+        }
+
+        .final-cta .cta-btn:hover {
+            background-color: var(--bg);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.1);
+        }
+
+        .footer-line {
+            font-size: 12px;
+            color: #4B5563;
+            margin-top: 64px;
+            font-weight: 500;
+        }
+
+        /* RESPONSIVE DESIGN (MOBILE SCREEN CHECKS) */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0 24px;
+            }
+
+            .hero {
+                padding: 100px 12px 60px;
+            }
+
+            .hero-heading {
+                font-size: 32px;
+            }
+
+            .how-it-works {
+                padding: 50px 12px;
+            }
+
+            .section-heading {
+                font-size: 24px;
+            }
+
+            .steps-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-top: 24px;
+            }
+
+            .what-it-reads {
+                padding: 50px 12px;
+            }
+
+            .reads-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-top: 24px;
+            }
+
+            .final-cta {
+                padding: 50px 12px;
+            }
+
+            .final-cta h2 {
+                font-size: 24px;
+            }
+
+            .footer-line {
+                margin-top: 40px;
+            }
+        }
+
+        /* Modals Styling */
+        .ws-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .ws-modal-backdrop.show {
+            display: flex;
+            opacity: 1;
+        }
+        .ws-modal-container {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            max-width: 500px;
+            width: calc(100% - 32px);
+            padding: 32px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .ws-modal-backdrop.show .ws-modal-container {
+            transform: scale(1);
+        }
+        .ws-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+        .ws-modal-close:hover {
+            color: var(--text-primary);
+        }
+        .ws-modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+        .ws-modal-section {
+            margin-bottom: 20px;
+        }
+        .ws-modal-section:last-of-type {
+            margin-bottom: 0;
+        }
+        .ws-modal-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+        .ws-modal-section-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Redirection Check -->
+    <script>
+        (function() {
+            const token = localStorage.getItem('ws_token') || localStorage.getItem('worksphere_token');
+            if (token) {
+                window.location.href = '/dashboard';
+            }
+        })();
+    </script>
+
+    <!-- SECTION 1 — TOP NAV BAR -->
+    <header class="navbar">
+        <a href="/" class="nav-logo">WorkSphere AI</a>
+        <button class="nav-btn" onclick="window.location.href = '/auth/login'">
+            <svg width="16" height="16" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1 1h9v9H1z" fill="#f25022"/>
+                <path d="M11 1h9v9h-9z" fill="#7fbb00"/>
+                <path d="M1 11h9v9H1z" fill="#00a4ef"/>
+                <path d="M11 11h9v9h-9z" fill="#ffb900"/>
+            </svg>
+            <span>Sign in with Microsoft</span>
+        </button>
+    </header>
+
+    <!-- SECTION 2 — HERO -->
+    <section class="hero">
+        <div class="hero-content reveal">
+            <span class="badge">Powered by Microsoft Graph</span>
+            <h1 class="hero-heading">Your Executive Workplace Intelligence Platform</h1>
+            <p class="hero-subheading">WorkSphere AI deploys four specialist AI analysts that continuously monitor your Microsoft 365 and Google Workspace data — surfacing urgent issues, key decisions, and risks before your day begins.</p>
+            
+            <button class="cta-btn" onclick="window.location.href = '/auth/login'">
+                <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1h9v9H1z" fill="#f25022"/>
+                    <path d="M11 1h9v9h-9z" fill="#7fbb00"/>
+                    <path d="M1 11h9v9H1z" fill="#00a4ef"/>
+                    <path d="M11 11h9v9h-9z" fill="#ffb900"/>
+                </svg>
+                <span>Sign in with Microsoft</span>
+            </button>
+
+            <div class="or-separator" style="margin: 16px auto; display: flex; align-items: center; justify-content: center; gap: 12px; max-width: 320px; width: 100%;">
+                <div style="flex-grow: 1; height: 1px; background-color: var(--border);"></div>
+                <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">or</span>
+                <div style="flex-grow: 1; height: 1px; background-color: var(--border);"></div>
+            </div>
+
+            <button class="cta-btn" onclick="window.location.href = '/auth/google/login'" style="background-color: #FFFFFF; color: var(--text-primary); border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin: 0 auto;">
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                </svg>
+                <span>Sign in with Google</span>
+            </button>
+
+            <p class="cta-subtext">No account setup needed. Sign in with your existing Microsoft account.</p>
+
+            <div style="margin-top: 16px; display: flex; justify-content: center; gap: 16px; font-size: 13px;">
+                <a href="#" class="ws-modal-trigger" data-modal="security-modal" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'">Security Policy</a>
+                <span style="color: var(--text-muted);">·</span>
+                <a href="#" class="ws-modal-trigger" data-modal="support-modal" style="color: var(--text-secondary); text-decoration: none; font-weight: 500; transition: color 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'">Enterprise Support</a>
+            </div>
+
+            <div class="stat-pills">
+                <span class="stat-pill">4 AI Agents</span>
+                <span class="stat-pill">Real-time streaming</span>
+                <span class="stat-pill">Microsoft 365 connected</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3 — FEATURE/BENEFIT -->
+    <section class="how-it-works" style="background-color: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="section-label reveal">Platform Highlights</div>
+        <h2 class="section-heading reveal">Built for Executive Decision Making</h2>
+
+        <div class="steps-grid">
+            <!-- Card 1 -->
+            <div class="step-card reveal">
+                <div class="step-num">01</div>
+                <div class="step-icon">🤖</div>
+                <h3 class="step-title">Four Specialist Analysts</h3>
+                <p class="step-desc">Communications, Meeting Intelligence, Workload &amp; Delivery, and Enterprise Knowledge analysts run in parallel.</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="step-card reveal" style="transition-delay: 0.1s;">
+                <div class="step-num">02</div>
+                <div class="step-icon">⚡</div>
+                <h3 class="step-title">Real-time Briefings</h3>
+                <p class="step-desc">Your daily executive briefing streams to you in seconds — decisions, risks, urgent emails, and deadlines in one view.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="step-card reveal" style="transition-delay: 0.2s;">
+                <div class="step-num">03</div>
+                <div class="step-icon">🌐</div>
+                <h3 class="step-title">Microsoft 365 + Google Workspace</h3>
+                <p class="step-desc">Connects to Outlook, Calendar, OneDrive, Teams, Gmail, Google Drive, and Google Calendar.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3.5 — HOW IT WORKS -->
+    <section class="how-it-works" style="background-color: var(--surface);">
+        <div class="section-label reveal">How It Works</div>
+        <h2 class="section-heading reveal">From connection to intelligence in seconds</h2>
+
+        <div class="steps-grid">
+            <!-- Step 1 -->
+            <div class="step-card reveal">
+                <div class="step-num">01</div>
+                <div class="step-icon">🔌</div>
+                <h3 class="step-title">Connect your accounts</h3>
+                <p class="step-desc">Sign in with Microsoft or Google in one click. No setup required.</p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card reveal" style="transition-delay: 0.1s;">
+                <div class="step-num">02</div>
+                <div class="step-icon">🧠</div>
+                <h3 class="step-title">Analysts go to work</h3>
+                <p class="step-desc">Four AI analysts read your emails, calendar, tasks, and documents simultaneously.</p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card reveal" style="transition-delay: 0.2s;">
+                <div class="step-num">03</div>
+                <div class="step-icon">📊</div>
+                <h3 class="step-title">Your briefing arrives</h3>
+                <p class="step-desc">A full executive briefing — decisions, risks, actions, deadlines — compiled in seconds.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4 — WHAT IT READS -->
+    <section class="what-it-reads">
+        <div class="section-label reveal">Workspace Connected</div>
+        <h2 class="section-heading reveal">Reads your whole workspace</h2>
+
+        <div class="reads-grid">
+            <!-- Mail -->
+            <div class="read-card reveal">
+                <div class="read-icon blue">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="read-content">
+                    <h3>Email</h3>
+                    <p>Outlook inbox and Gmail — urgent items, approvals, and stakeholder signals</p>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div class="read-card reveal" style="transition-delay: 0.05s;">
+                <div class="read-icon green">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div class="read-content">
+                    <h3>Calendar &amp; Meetings</h3>
+                    <p>Upcoming events, decisions made, action items, and open risks</p>
+                </div>
+            </div>
+
+            <!-- Tasks -->
+            <div class="read-card reveal" style="transition-delay: 0.1s;">
+                <div class="read-icon amber">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div class="read-content">
+                    <h3>Tasks &amp; Projects</h3>
+                    <p>Microsoft To Do, Planner, and Google Tasks — overdue items and blockers</p>
+                </div>
+            </div>
+
+            <!-- Files -->
+            <div class="read-card reveal" style="transition-delay: 0.15s;">
+                <div class="read-icon purple">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                    </svg>
+                </div>
+                <div class="read-content">
+                    <h3>Documents &amp; Files</h3>
+                    <p>OneDrive, SharePoint, and Google Drive — contracts, proposals, and reports</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5 — FINAL CTA -->
+    <section class="final-cta">
+        <div class="reveal">
+            <h2>Intelligence that works while you sleep</h2>
+            <p>Join teams using WorkSphere AI to reclaim hours lost to context-switching.</p>
+
+            <button class="cta-btn" onclick="window.location.href = '/auth/login'">
+                <svg width="20" height="20" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1 1h9v9H1z" fill="#f25022"/>
+                    <path d="M11 1h9v9h-9z" fill="#7fbb00"/>
+                    <path d="M1 11h9v9H1z" fill="#00a4ef"/>
+                    <path d="M11 11h9v9h-9z" fill="#ffb900"/>
+                </svg>
+                <span>Sign in with Microsoft</span>
+            </button>
+
+            <div class="or-separator" style="margin: 16px auto; display: flex; align-items: center; justify-content: center; gap: 12px; max-width: 320px; width: 100%;">
+                <div style="flex-grow: 1; height: 1px; background-color: rgba(255,255,255,0.15);"></div>
+                <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">or</span>
+                <div style="flex-grow: 1; height: 1px; background-color: rgba(255,255,255,0.15);"></div>
+            </div>
+
+            <button class="cta-btn" onclick="window.location.href = '/auth/google/login'" style="background-color: #FFFFFF; color: #111827; border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin: 0 auto;">
+                <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                </svg>
+                <span>Sign in with Google</span>
+            </button>
+
+            <div style="margin-top: 24px; display: flex; justify-content: center; gap: 24px; font-size: 13px; margin-bottom: -16px;">
+                <a href="#" class="ws-modal-trigger" data-modal="security-modal" style="color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Security Policy</a>
+                <a href="#" class="ws-modal-trigger" data-modal="support-modal" style="color: rgba(255,255,255,0.6); text-decoration: none; transition: color 0.2s;" onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='rgba(255,255,255,0.6)'">Enterprise Support</a>
+            </div>
+            <div class="footer-line">WorkSphere AI · Built with Microsoft Graph and Google APIs</div>
+        </div>
+    </section>
+
+    <!-- Scroll Reveal Activation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Optional: stop observing once revealed
+                        // observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px' // trigger slightly before entering viewport
+            });
+
+            reveals.forEach(el => observer.observe(el));
+        });
+    </script>
+
+    <!-- Security Policy Modal -->
+    <div id="security-modal" class="ws-modal-backdrop">
+        <div class="ws-modal-container">
+            <button class="ws-modal-close" onclick="closeModal('security-modal')">&times;</button>
+            <h3 class="ws-modal-title">Security &amp; Data Protection</h3>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">TLS 1.3 Encryption</h4>
+                <p class="ws-modal-section-desc">All transit data between your browser, our API backend, and Microsoft/Google servers is encrypted using TLS 1.3 with AES-256-GCM cipher suites.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">OAuth 2.0 Credentials Isolation</h4>
+                <p class="ws-modal-section-desc">We authenticate using secure delegated OAuth 2.0 authorization codes. WorkSphere AI never accesses, collects, or stores your primary passwords.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">Zero Token Retention</h4>
+                <p class="ws-modal-section-desc">API access tokens are held in short-lived encrypted in-memory cookies or secure storage. Logging out completely destroys all local sessions and token registries.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">Private Processing</h4>
+                <p class="ws-modal-section-desc">Your email content, file metadata, and meeting notes are processed in real-time in-memory. No workspace text is ever saved to disk or utilized for training public LLM models.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enterprise Support Modal -->
+    <div id="support-modal" class="ws-modal-backdrop">
+        <div class="ws-modal-container">
+            <button class="ws-modal-close" onclick="closeModal('support-modal')">&times;</button>
+            <h3 class="ws-modal-title">Enterprise Support &amp; Compliance</h3>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">Dedicated SLA &amp; Support</h4>
+                <p class="ws-modal-section-desc">Enterprise subscribers receive 24/7 dedicated support with a guaranteed response time SLA of under 30 minutes from our technical operations team.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">Self-Host / Private Tenant</h4>
+                <p class="ws-modal-section-desc">WorkSphere AI supports on-premise Kubernetes hosting or single-tenant virtual private cloud (VPC) deployments in your own Azure, GCP, or AWS subscription.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">SOC 2 &amp; Compliance</h4>
+                <p class="ws-modal-section-desc">Our architecture meets strict compliance standards, including SOC 2 Type II readiness, GDPR data processor boundaries, and ISO/IEC 27001 certification frameworks.</p>
+            </div>
+            
+            <div class="ws-modal-section">
+                <h4 class="ws-modal-section-title">Contact Executive Desk</h4>
+                <p class="ws-modal-section-desc">For setup questions, compliance documentation, or onboarding, contact our corporate support team at <strong>enterprise@worksphere.ai</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals JS Code -->
+    <script>
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.style.display = 'flex';
+                // Trigger reflow
+                modal.offsetHeight;
+                modal.classList.add('show');
+            }
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300); // match transition duration
+            }
+        }
+
+        document.querySelectorAll('.ws-modal-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modalId = trigger.getAttribute('data-modal');
+                openModal(modalId);
+            });
+        });
+
+        // Close modal when clicking backdrop
+        document.querySelectorAll('.ws-modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                if (e.target === backdrop) {
+                    closeModal(backdrop.id);
+                }
+            });
+        });
+
+        // ESC key listener to close modals
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.ws-modal-backdrop.show').forEach(modal => {
+                    closeModal(modal.id);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
